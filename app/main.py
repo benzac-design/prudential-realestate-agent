@@ -4,11 +4,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
 load_dotenv()
 
 from app.routes import listings, leads, followups, clients
 from app.scheduler import process_pending_followups
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 app = FastAPI(title="Real Estate AI Agent")
 
@@ -19,8 +22,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-templates = Jinja2Templates(directory="frontend")
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "frontend" / "static")), name="static")
+templates = Jinja2Templates(directory=str(BASE_DIR / "frontend"))
 
 app.include_router(listings.router, prefix="/api")
 app.include_router(leads.router, prefix="/api")

@@ -1,7 +1,13 @@
-import anthropic
+import google.generativeai as genai
 import os
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+
+def _ask(prompt: str) -> str:
+    response = model.generate_content(prompt)
+    return response.text
 
 
 def generate_listing_description(address, bedrooms, bathrooms, sqft, price, features, neighborhood="", agent_name=""):
@@ -24,13 +30,7 @@ Write a 150-200 word listing description that:
 5. Uses professional real estate language
 
 Return only the listing description, nothing else."""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=400,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
 
 
 def generate_lead_followup_sms(lead_name, agent_name, property_type="home"):
@@ -47,13 +47,7 @@ Rules:
 - Sign with agent name
 
 Return only the SMS text, nothing else."""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=100,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
 
 
 def generate_lead_followup_email(lead_name, agent_name, lead_message="", agency=""):
@@ -72,13 +66,7 @@ Rules:
 - End with clear next step (schedule a call)
 
 Return the subject line and email body, nothing else."""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=400,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
 
 
 def generate_followup_sequence_message(lead_name, agent_name, day_number, context=""):
@@ -89,15 +77,8 @@ def generate_followup_sequence_message(lead_name, agent_name, day_number, contex
         30: f"Write a 1-month follow-up SMS to {lead_name} from agent {agent_name}. Mention a new listing in their area. Max 160 chars.",
         60: f"Write a 2-month follow-up SMS to {lead_name} from agent {agent_name}. Market update, keep it light. Max 160 chars.",
     }
-
     prompt = prompts.get(day_number, f"Write a follow-up SMS to {lead_name} from agent {agent_name}. Keep it friendly. Max 160 chars.")
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=100,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
 
 
 def audit_fair_housing_compliance(listing_description):
@@ -130,13 +111,7 @@ SUGGESTED FIXES:
 
 SUMMARY:
 [One sentence summary of the compliance status]"""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=600,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
 
 
 def generate_client_update_email(client_name, agent_name, new_listings, criteria):
@@ -158,10 +133,4 @@ Rules:
 - End with offer to schedule viewings
 
 Return only the subject line and email body."""
-
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=500,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return message.content[0].text
+    return _ask(prompt)
