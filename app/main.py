@@ -36,6 +36,21 @@ async def dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get("/prudential-demo")
+async def prudential_demo(request: Request):
+    return templates.TemplateResponse("prudential-demo.html", {"request": request})
+
+
+@app.get("/sales")
+async def sales(request: Request):
+    return templates.TemplateResponse("sales.html", {"request": request})
+
+
+@app.get("/overview")
+async def overview(request: Request):
+    return templates.TemplateResponse("overview.html", {"request": request})
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
