@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Demo — Prudential Real Estate</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red: #c8102e;
+      --red-dark: #a00d24;
+      --red-light: #ff1f47;
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #1a1a1a;
+      --border: #222222;
+      --text: #f5f5f5;
+      --muted: #888;
+      --subtle: #444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-logo .logo-box {
+      width: 36px;
+      height: 36px;
+      background: var(--red);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: white;
+    }
+    .nav-logo .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+    .nav-logo .logo-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .nav-badge {
+      background: #1a0a0d;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 80px 48px 72px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a0a0d;
+      border: 1px solid #3a0a12;
+      color: #ff6b81;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+    .hero-tag .dot {
+      width: 6px; height: 6px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+    h1 {
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+    h1 span { color: var(--red); }
+    .hero-sub {
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 640px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .hero-stat .val {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--red);
+      line-height: 1;
+    }
+    .hero-stat .lbl {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* SECTION */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 64px 48px;
+    }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .section-desc {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    /* FLOW */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .flow-step {
+      flex: 1;
+      padding: 28px 24px;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .flow-step:last-child { border-right: none; }
+    .flow-step .num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .flow-step .icon { font-size: 28px; margin-bottom: 10px; }
+    .flow-step h4 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .flow-step p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .flow-step .time {
+      display: inline-block;
+      background: #1a0a0d;
+      border: 1px solid #3a0a12;
+      color: var(--red);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    /* FEATURES GRID */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 800px) {
+      .features { grid-template-columns: 1fr; }
+      h1 { font-size: 36px; }
+      nav { padding: 16px 24px; }
+      .hero, .section { padding: 48px 24px; }
+    }
+    .feature {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .feature:hover { border-color: #3a0a12; }
+    .feature .f-icon {
+      width: 44px; height: 44px;
+      background: #1a0a0d;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .feature h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .feature p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+    .feature .tag {
+      display: inline-block;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* COMPARISON */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .compare-col {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .compare-col.highlight { border-color: var(--red); }
+    .compare-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .compare-col.highlight .compare-header {
+      background: #1a0a0d;
+      color: var(--red);
+    }
+    .compare-row {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+    }
+    .compare-row:last-child { border-bottom: none; }
+    .compare-col.highlight .compare-row { color: var(--text); }
+    .check { color: #22c55e; font-size: 16px; }
+    .cross { color: #ef4444; font-size: 16px; }
+
+    /* DEMO SCREEN */
+    .demo-screen {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .demo-topbar {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .demo-url {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 12px;
+      flex: 1;
+      max-width: 300px;
+    }
+    .demo-content { padding: 32px; }
+    .sms-bubble {
+      background: var(--red);
+      color: white;
+      border-radius: 18px 18px 4px 18px;
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 340px;
+      margin-bottom: 8px;
+    }
+    .sms-meta { font-size: 11px; color: var(--muted); margin-left: 4px; }
+    .email-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+      max-width: 500px;
+    }
+    .email-subject { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .email-from { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .email-body { font-size: 13px; color: #aaa; line-height: 1.6; }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(135deg, #1a0a0d 0%, #0a0a0a 100%);
+      border-top: 1px solid #2a0a10;
+      border-bottom: 1px solid #2a0a10;
+      padding: 72px 48px;
+      text-align: center;
+    }
+    .cta-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { font-size: 18px; color: var(--muted); margin-bottom: 36px; }
+    .cta-price {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .cta-price-sub { font-size: 16px; color: var(--muted); margin-bottom: 32px; }
+    .cta-note { font-size: 14px; color: var(--subtle); margin-top: 20px; }
+
+    /* FOOTER */
+    footer {
+      padding: 32px 48px;
+      text-align: center;
+      color: var(--subtle);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <div class="logo-box">P</div>
+      <div>
+        <div class="logo-text">Prudential Real Estate</div>
+        <div class="logo-sub">AI Agent Demo</div>
+      </div>
+    </div>
+    <div class="nav-badge">Private Demo</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">
+      <span class="dot"></span>
+      Prepared exclusively for Ash · Prudential Real Estate Macquarie Fields
+    </div>
+    <h1>Ash, your portfolio<br>runs itself — <span>with AI.</span></h1>
+    <p class="hero-sub">An AI agent built for property managers with large rental portfolios. It handles every tenant enquiry, landlord update, inspection booking, and lease follow-up — automatically, 24/7, while you focus on growing the portfolio.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="val">&lt;5s</div>
+        <div class="lbl">Tenant enquiry response</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">20hrs</div>
+        <div class="lbl">Saved per week</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">100%</div>
+        <div class="lbl">Landlords kept updated</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val">$200</div>
+        <div class="lbl">Per month flat fee</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">From tenant enquiry to signed lease — fully automated</div>
+    <div class="section-desc">Every step of your rental workflow handled automatically. You only get involved when it's time to approve a tenant.</div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="num">Step 01</div>
+        <div class="icon">🏠</div>
+        <h4>Tenant enquires</h4>
+        <p>Someone enquires about a rental on your website or portal</p>
+        <span class="time">0 seconds</span>
+      </div>
+      <div class="flow-step">
+        <div class="num">Step 02</div>
+        <div class="icon">⚡</div>
+        <h4>AI responds instantly</h4>
+        <p>Personalised SMS + email sent from your office name</p>
+        <span class="time">&lt;5 seconds</span>
+      </div>
+      <div class="flow-step">
+        <div class="num">Step 03</div>
+        <div class="icon">🗓️</div>
+        <h4>Inspection booked</h4>
+        <p>AI books the inspection time automatically — no back and forth</p>
+        <span class="time">Same day</span>
+      </div>
+      <div class="flow-step">
+        <div class="num">Step 04</div>
+        <div class="icon">📊</div>
+        <h4>Landlord updated</h4>
+        <p>Weekly email to every landlord — enquiry numbers, status, next steps</p>
+        <span class="time">Every week</span>
+      </div>
+      <div class="flow-step">
+        <div class="num">Step 05</div>
+        <div class="icon">🔁</div>
+        <h4>60-day follow-up</h4>
+        <p>Tenants not ready yet get followed up at Day 3, 7, 14, 30, 60</p>
+        <span class="time">Automated</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- DEMO: WHAT IT SENDS -->
+  <div class="section">
+    <div class="section-label">Live Demo</div>
+    <div class="section-title">What a tenant and landlord actually receive</div>
+    <div class="section-desc">Real examples of what gets sent automatically — no one on your team needs to write or send these.</div>
+
+    <div class="demo-screen">
+      <div class="demo-topbar">
+        <div class="demo-dot" style="background:#ef4444"></div>
+        <div class="demo-dot" style="background:#f59e0b"></div>
+        <div class="demo-dot" style="background:#22c55e"></div>
+        <div class="demo-url">Tenant SMS — sent in under 5 seconds</div>
+      </div>
+      <div class="demo-content">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">📱 Text Message to prospective tenant · Delivered in 4 seconds</div>
+        <div class="sms-bubble">
+          Hi Marcus! This is Ash from Prudential Real Estate Macquarie Fields. Thanks for your rental enquiry — I'd love to organise an inspection for you. Are you available this Saturday or would a weekday suit better? 😊
+        </div>
+        <div class="sms-meta">Delivered · 4s after enquiry submitted</div>
+
+        <div class="email-card" style="margin-top:24px;">
+          <div class="email-subject">Weekly update — 14 Borrowdale St, Macquarie Fields</div>
+          <div class="email-from">From: Ash · Prudential Real Estate Macquarie Fields</div>
+          <div class="email-body">
+            Hi David,<br><br>
+            Here's your weekly update on 14 Borrowdale St. We've had <strong>6 enquiries</strong> this week and <strong>3 inspections</strong> scheduled for Saturday. Two applications are currently being assessed.<br><br>
+            The property is attracting strong interest and we expect to have a recommended tenant for your approval by end of next week.<br><br>
+            I'll be in touch as soon as we have a shortlist ready.<br><br>
+            Ash<br>
+            Prudential Real Estate · Macquarie Fields
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- FEATURES -->
+  <div class="section">
+    <div class="section-label">Features</div>
+    <div class="section-title">Built for rental portfolio management</div>
+    <div class="section-desc">Everything a property manager with a large rental book needs — automated, professional, and running 24/7.</div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="f-icon">⚡</div>
+        <h3>Instant Tenant Response</h3>
+        <p>Every rental enquiry gets an SMS and email reply within 5 seconds — day or night, weekends included. Never lose a good tenant to a slower agency.</p>
+        <span class="tag">24/7 automated</span>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🗓️</div>
+        <h3>Automatic Inspection Bookings</h3>
+        <p>AI books inspection times directly without any back-and-forth. Tenants self-select a time, confirmation sent automatically.</p>
+        <span class="tag">Saves 5hrs/week</span>
+      </div>
+      <div class="feature">
+        <div class="f-icon">📊</div>
+        <h3>Weekly Landlord Updates</h3>
+        <p>Every landlord in your portfolio gets a professional weekly email — enquiry numbers, inspection results, application status. One click sends them all.</p>
+        <span class="tag">Keeps landlords happy</span>
+      </div>
+      <div class="feature">
+        <div class="f-icon">🔁</div>
+        <h3>60-Day Tenant Follow-Up</h3>
+        <p>Prospects not ready to commit get 5 follow-ups over 60 days. When they're ready to rent, they think of you first.</p>
+        <span class="tag">5 touchpoints per lead</span>
+      </div>
+      <div class="feature">
+        <div class="f-icon">✍️</div>
+        <h3>AI Rental Listing Copy</h3>
+        <p>Enter the property details and get a professional rental listing description in 30 seconds — ready to post on Domain or REA.</p>
+        <span class="tag">30 seconds per listing</span>
+      </div>
+      <div class="feature">
+        <div class="f-icon">⚖️</div>
+        <h3>Compliance Audit on Every Listing</h3>
+        <p>Every listing is automatically checked for discriminatory language before it goes live — protecting Ash, Prudential, and your landlords.</p>
+        <span class="tag">Legal protection</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- COMPARISON -->
+  <div class="section">
+    <div class="section-label">Comparison</div>
+    <div class="section-title">AI Agent vs doing it manually</div>
+    <div class="section-desc">Managing a large rental portfolio manually means your time is eaten up by admin. The AI handles the repetitive work so you focus on growing the book.</div>
+
+    <div class="compare">
+      <div class="compare-col">
+        <div class="compare-header">😓 Manual Property Management</div>
+        <div class="compare-row"><span class="cross">✗</span> Tenant enquiries sit for hours</div>
+        <div class="compare-row"><span class="cross">✗</span> Weekend enquiries missed entirely</div>
+        <div class="compare-row"><span class="cross">✗</span> Landlords chasing you for updates</div>
+        <div class="compare-row"><span class="cross">✗</span> Inspection bookings take 10+ emails</div>
+        <div class="compare-row"><span class="cross">✗</span> Good tenants go to a faster agency</div>
+        <div class="compare-row"><span class="cross">✗</span> 20hrs/week lost to admin</div>
+      </div>
+      <div class="compare-col highlight">
+        <div class="compare-header">🤖 With Your AI Agent</div>
+        <div class="compare-row"><span class="check">✓</span> Every enquiry answered in &lt;5 seconds</div>
+        <div class="compare-row"><span class="check">✓</span> 24/7 coverage including weekends</div>
+        <div class="compare-row"><span class="check">✓</span> Landlords get weekly updates automatically</div>
+        <div class="compare-row"><span class="check">✓</span> Inspections booked without back-and-forth</div>
+        <div class="compare-row"><span class="check">✓</span> You always respond first — every time</div>
+        <div class="compare-row"><span class="check">✓</span> 20hrs/week back to grow your portfolio</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- WHAT YOU'RE LOSING -->
+  <div class="section">
+    <div class="section-label">The Cost of Doing Nothing</div>
+    <div class="section-title">Ash, here's what slow responses are costing your portfolio right now</div>
+    <div class="section-desc">Every delayed response, every landlord left without an update, every good tenant who went elsewhere — it adds up fast on a large rental book.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div style="background:#140a0a;border:1px solid #3a0a12;border-radius:14px;padding:28px;">
+        <div style="font-size:28px;margin-bottom:12px;">🏃</div>
+        <h3 style="font-size:17px;font-weight:700;color:#ff6b81;margin-bottom:10px;">Losing Good Tenants to Faster Agencies</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Quality tenants apply to 3–5 properties at once. <strong style="color:var(--text)">They go with whoever responds first.</strong> If your reply comes hours later, they've already booked an inspection elsewhere — leaving your landlord with a longer vacancy.</p>
+      </div>
+      <div style="background:#140a0a;border:1px solid #3a0a12;border-radius:14px;padding:28px;">
+        <div style="font-size:28px;margin-bottom:12px;">😤</div>
+        <h3 style="font-size:17px;font-weight:700;color:#ff6b81;margin-bottom:10px;">Landlords Leaving for Better Service</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Landlords expect proactive communication. <strong style="color:var(--text)">If they're the ones chasing you for updates,</strong> they start looking at other agencies. Losing even 5 properties from your management roll is significant recurring revenue gone.</p>
+      </div>
+      <div style="background:#140a0a;border:1px solid #3a0a12;border-radius:14px;padding:28px;">
+        <div style="font-size:28px;margin-bottom:12px;">📅</div>
+        <h3 style="font-size:17px;font-weight:700;color:#ff6b81;margin-bottom:10px;">Extended Vacancy Periods</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Every extra week a property sits vacant costs the landlord ~<strong style="color:var(--text)">$475 in lost rent</strong> (Macquarie Fields avg). Slow tenant follow-up drags out vacancies — and unhappy landlords blame their property manager.</p>
+      </div>
+      <div style="background:#140a0a;border:1px solid #3a0a12;border-radius:14px;padding:28px;">
+        <div style="font-size:28px;margin-bottom:12px;">⏰</div>
+        <h3 style="font-size:17px;font-weight:700;color:#ff6b81;margin-bottom:10px;">20 Hours of Admin Every Week</h3>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Responding to enquiries, booking inspections, writing landlord updates, chasing applications — <strong style="color:var(--text)">that's time you could spend onboarding new landlords</strong> and growing your management portfolio.</p>
+      </div>
+    </div>
+
+    <div style="background:#140a0a;border:1px solid #3a0a12;border-radius:14px;padding:28px;text-align:center;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:12px;">The Real Cost of Inaction</div>
+      <div style="font-size:42px;font-weight:900;color:#ff6b81;line-height:1;margin-bottom:8px;">$10,000–$40,000</div>
+      <div style="font-size:15px;color:var(--muted);">Estimated annual revenue lost through extended vacancies, lost landlords, and missed rental opportunities — on a 50+ property portfolio</div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- WHAT YOU GAIN -->
+  <div class="section">
+    <div class="section-label">What You Gain</div>
+    <div class="section-title">What changes for Ash and the Prudential Macquarie Fields portfolio</div>
+    <div class="section-desc">Real outcomes — for your landlords, your tenants, and your ability to grow the rental book without hiring more staff.</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:32px;">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">🏆</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Best tenants go to you first</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Quality tenants get a reply in under 5 seconds — before any other Macquarie Fields agency even sees the notification. The best applicants are yours.</p>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">😊</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Landlords stay — and refer</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Landlords who get weekly updates without asking feel looked after. Happy landlords don't leave. They refer their friends with investment properties.</p>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">📈</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Grow the portfolio without more staff</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">The AI handles the volume of a full admin assistant. Take on 20 more properties without hiring — the system scales with you.</p>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">🌙</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Shorter vacancies, happier landlords</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">Instant replies and automated inspection bookings mean properties get tenanted faster. Every week shaved off a vacancy is $475 saved for your landlord.</p>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">⏰</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">20 hours back every week</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">No more writing enquiry replies, landlord update emails, or chasing inspection bookings. That time goes into growing the management book.</p>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;border-top:3px solid #22c55e;">
+        <div style="font-size:26px;margin-bottom:12px;">💰</div>
+        <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">Pays for itself in week one</h3>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;">$200/month is less than one week of a vacancy period. If the AI helps fill even one property one week faster, it's already paid for the entire year.</p>
+      </div>
+    </div>
+
+    <!-- ROI calc — rental focused -->
+    <div style="background:linear-gradient(135deg,#0d1f0d,#0a0a0a);border:1px solid #1a3a1a;border-radius:16px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4ade80;margin-bottom:10px;">Portfolio ROI — 50 properties</div>
+        <div style="font-size:36px;font-weight:900;color:#4ade80;line-height:1;margin-bottom:6px;">20x+ ROI</div>
+        <div style="font-size:14px;color:var(--muted);">If it retains just 2 landlords and fills 4 vacancies 1 week faster</div>
+      </div>
+      <div style="display:flex;gap:32px;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--text);">$2,400</div>
+          <div style="font-size:12px;color:var(--muted);">Annual cost</div>
+        </div>
+        <div style="font-size:28px;color:var(--subtle);display:flex;align-items:center;">vs</div>
+        <div style="text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:#4ade80;">$50,000+</div>
+          <div style="font-size:12px;color:var(--muted);">Annual management fees retained</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="section-label" style="color:var(--red);text-align:center;margin-bottom:16px;">Exclusive offer — Ash · Prudential Macquarie Fields</div>
+    <h2>Ash, your portfolio deserves better than manual admin.</h2>
+    <p>We set it up in 24 hours. Every tenant enquiry answered instantly, every landlord updated weekly — from day one.</p>
+    <div class="cta-price">$200<span style="font-size:24px;font-weight:400;color:var(--muted)">/month</span></div>
+    <div class="cta-price-sub">One flat fee · No setup cost · Cancel anytime · Live in 24 hours</div>
+    <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap;">
+      <div style="background:#1a0a0d;border:1px solid #3a0a12;border-radius:12px;padding:16px 24px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--red);">Month 1</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">FREE — no risk trial</div>
+      </div>
+      <div style="background:#1a0a0d;border:1px solid #3a0a12;border-radius:12px;padding:16px 24px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--red);">24hrs</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">To go fully live</div>
+      </div>
+      <div style="background:#1a0a0d;border:1px solid #3a0a12;border-radius:12px;padding:16px 24px;text-align:center;">
+        <div style="font-size:20px;font-weight:800;color:var(--red);">3 spots</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">Left this month</div>
+      </div>
+    </div>
+    <div class="cta-note" style="margin-top:24px;">Limited to 1 agency per suburb — once Macquarie Fields is taken, competitors can't get access.</div>
+  </div>
+
+  <footer>
+    Confidential demo prepared for Prudential Real Estate · Macquarie Fields · Powered by Claude AI
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Estate AI Agent</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+  .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: #1a1a2e; padding: 24px 16px; }
+  .logo { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .logo span { color: #4f8ef7; }
+  .tagline { color: #8892a4; font-size: 12px; margin-bottom: 32px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; color: #8892a4; cursor: pointer; margin-bottom: 4px; transition: all 0.2s; font-size: 14px; }
+  .nav-item:hover, .nav-item.active { background: #252d42; color: #fff; }
+  .nav-item .icon { font-size: 18px; }
+
+  .main { margin-left: 240px; padding: 32px; }
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 26px; font-weight: 700; }
+  .header p { color: #666; margin-top: 4px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 32px; font-weight: 700; margin-top: 8px; color: #1a1a2e; }
+  .stat-change { font-size: 12px; color: #22c55e; margin-top: 4px; }
+
+  .section { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; display: none; }
+  .section.active { display: block; }
+  .section h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 13px; font-weight: 500; color: #555; }
+  input, textarea, select { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; transition: border 0.2s; width: 100%; }
+  input:focus, textarea:focus { border-color: #4f8ef7; }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+  .btn-primary { background: #4f8ef7; color: #fff; }
+  .btn-primary:hover { background: #3a7ae8; }
+  .btn-secondary { background: #f0f2f5; color: #333; }
+  .btn-sm { padding: 6px 14px; font-size: 13px; border-radius: 7px; }
+  .btn-green { background: #22c55e; color: #fff; }
+  .btn-green:hover { background: #16a34a; }
+
+  .result-box { background: #f8faff; border: 1.5px solid #e0e9ff; border-radius: 10px; padding: 20px; margin-top: 20px; white-space: pre-wrap; line-height: 1.7; font-size: 14px; }
+  .compliance-pass { background: #f0fff4; border: 1.5px solid #22c55e; border-radius: 10px; padding: 16px; margin-top: 12px; }
+  .compliance-fail { background: #fff5f5; border: 1.5px solid #ef4444; border-radius: 10px; padding: 16px; margin-top: 12px; }
+  .compliance-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+  .compliance-body { font-size: 13px; white-space: pre-wrap; line-height: 1.7; color: #444; }
+  .copy-btn { margin-top: 12px; }
+
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { text-align: left; padding: 10px 14px; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #f0f0f0; }
+  .leads-table td { padding: 14px; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .badge-new { background: #dbeafe; color: #1d4ed8; }
+  .badge-contacted { background: #dcfce7; color: #166534; }
+  .badge-qualified { background: #fef9c3; color: #854d0e; }
+
+  .loading { display: none; color: #4f8ef7; font-size: 14px; margin-top: 12px; }
+  .loading.show { display: block; }
+
+  .embed-code { background: #1a1a2e; color: #7dd3fc; border-radius: 10px; padding: 20px; font-family: monospace; font-size: 13px; margin-top: 16px; overflow-x: auto; white-space: pre; }
+
+  .sequence-step { display: flex; align-items: center; gap: 16px; background: #f8f9fa; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .step-badge { border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; color: #fff; }
+
+  @media (max-width: 900px) { .form-grid, .stats { grid-template-columns: 1fr; } .sidebar { display: none; } .main { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">Real Estate <span>AI</span></div>
+  <div class="tagline">Your 24/7 AI Agent</div>
+  <nav>
+    <div class="nav-item active" onclick="showSection('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showSection('listings', this)"><span class="icon">🏠</span> Listing Descriptions</div>
+    <div class="nav-item" onclick="showSection('leads', this)"><span class="icon">👥</span> Leads</div>
+    <div class="nav-item" onclick="showSection('followups', this)"><span class="icon">📱</span> Follow-Up Sequences</div>
+    <div class="nav-item" onclick="showSection('clients', this)"><span class="icon">📧</span> Client Updates</div>
+    <div class="nav-item" onclick="showSection('embed', this)"><span class="icon">🔗</span> Embed Lead Form</div>
+  </nav>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="section active">
+    <div class="header">
+      <h1>Welcome back 👋</h1>
+      <p>Here's what your AI agent has been doing for you</p>
+    </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value" id="stat-leads">—</div>
+        <div class="stat-change">AI contacted all within seconds</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Listings Created</div>
+        <div class="stat-value" id="stat-listings">—</div>
+        <div class="stat-change">Saved hours of writing</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Follow-Ups Sent</div>
+        <div class="stat-value">Auto</div>
+        <div class="stat-change">Running 24/7 in background</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Time Saved</div>
+        <div class="stat-value">Hours</div>
+        <div class="stat-change">Every single week</div>
+      </div>
+    </div>
+    <div style="background:#f0f7ff;border-radius:12px;padding:20px;border-left:4px solid #4f8ef7;">
+      <b>Your AI agent is active and running.</b> It will automatically text and email new leads, schedule follow-up sequences, and send weekly client updates — all without you lifting a finger.
+    </div>
+  </div>
+
+  <!-- LISTING DESCRIPTIONS -->
+  <div id="listings" class="section">
+    <h2>🏠 Generate Listing Description</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">Enter your property details and AI will write a professional MLS listing description in seconds.</p>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Property Address</label>
+        <input type="text" id="address" placeholder="123 Main Street, Austin TX 78701">
+      </div>
+      <div class="form-group">
+        <label>Bedrooms</label>
+        <input type="number" id="bedrooms" placeholder="4" min="1">
+      </div>
+      <div class="form-group">
+        <label>Bathrooms</label>
+        <input type="number" id="bathrooms" placeholder="2.5" step="0.5" min="1">
+      </div>
+      <div class="form-group">
+        <label>Square Feet</label>
+        <input type="number" id="sqft" placeholder="2100">
+      </div>
+      <div class="form-group">
+        <label>Listing Price ($)</label>
+        <input type="number" id="price" placeholder="450000">
+      </div>
+      <div class="form-group full">
+        <label>Key Features (comma separated)</label>
+        <input type="text" id="features" placeholder="granite countertops, hardwood floors, pool, 2-car garage">
+      </div>
+      <div class="form-group">
+        <label>Neighborhood (optional)</label>
+        <input type="text" id="neighborhood" placeholder="South Congress, Mueller, etc.">
+      </div>
+      <div class="form-group">
+        <label>Your Name (optional)</label>
+        <input type="text" id="agent-name" placeholder="Jane Smith">
+      </div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:20px;" onclick="generateListing()">✨ Generate Description</button>
+    <div class="loading" id="listing-loading">AI is writing your listing description...</div>
+    <div id="listing-result" style="display:none;">
+      <div class="result-box" id="listing-text"></div>
+      <button class="btn btn-secondary btn-sm copy-btn" onclick="copyListing()">📋 Copy to Clipboard</button>
+      <div id="compliance-result" style="display:none;">
+        <div class="compliance-title"></div>
+        <div class="compliance-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div id="leads" class="section">
+    <h2>👥 Lead Management</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">All leads are automatically contacted by AI the moment they fill out your form.</p>
+    <div id="leads-list">
+      <div style="color:#888;text-align:center;padding:40px;">Loading leads...</div>
+    </div>
+  </div>
+
+  <!-- FOLLOW-UP SEQUENCES -->
+  <div id="followups" class="section">
+    <h2>📱 Follow-Up Sequences</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">AI automatically texts cold leads at day 3, 7, 14, 30, and 60. You do nothing.</p>
+    <div style="background:#f0fff4;border-radius:12px;padding:20px;border-left:4px solid #22c55e;margin-bottom:24px;">
+      <b>✅ Sequences are running automatically</b><br>
+      <span style="font-size:13px;color:#555;">Every new lead is automatically enrolled in a 60-day follow-up sequence.</span>
+    </div>
+    <h3 style="margin-bottom:16px;font-size:15px;">Sequence Timeline</h3>
+    <div id="sequence-steps"></div>
+  </div>
+
+  <!-- CLIENT UPDATES -->
+  <div id="clients" class="section">
+    <h2>📧 Weekly Client Updates</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">Send AI-written weekly property updates to all your buyer clients at once.</p>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label>New Listings This Week (one per line)</label>
+      <textarea id="new-listings" placeholder="4bed/3bath at 456 Oak Ave, Austin — $520,000&#10;3bed/2bath at 789 Pine St, Round Rock — $380,000"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="sendClientUpdates()">📨 Send Updates to All Clients</button>
+    <div class="loading" id="client-loading">Sending AI-written updates to all clients...</div>
+    <div id="client-result"></div>
+  </div>
+
+  <!-- EMBED -->
+  <div id="embed" class="section">
+    <h2>🔗 Embed Lead Capture Form</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">Copy this code and paste it into your website. When someone fills it out, AI will contact them instantly.</p>
+    <div class="embed-code" id="embed-code"></div>
+    <button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="copyEmbed()">📋 Copy Embed Code</button>
+  </div>
+
+</div>
+
+<script>
+const AGENT_ID = "default-agent";
+
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = String(str || '');
+  return d.innerHTML;
+}
+
+function showSection(name, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'leads') loadLeads();
+  if (name === 'embed') setupEmbed();
+  if (name === 'followups') setupSequence();
+}
+
+async function generateListing() {
+  const address = document.getElementById('address').value;
+  const bedrooms = document.getElementById('bedrooms').value;
+  const bathrooms = document.getElementById('bathrooms').value;
+  const sqft = document.getElementById('sqft').value;
+  const price = document.getElementById('price').value;
+  const features = document.getElementById('features').value;
+
+  if (!address || !bedrooms || !bathrooms || !sqft || !price || !features) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
+  document.getElementById('listing-loading').classList.add('show');
+  document.getElementById('listing-result').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/listings/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        address, bedrooms: parseInt(bedrooms), bathrooms: parseFloat(bathrooms),
+        sqft: parseInt(sqft), price: parseInt(price), features,
+        neighborhood: document.getElementById('neighborhood').value,
+        agent_name: document.getElementById('agent-name').value,
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('listing-text').textContent = data.description;
+      document.getElementById('listing-result').style.display = 'block';
+
+      const complianceEl = document.getElementById('compliance-result');
+      complianceEl.className = data.compliance_passed ? 'compliance-pass' : 'compliance-fail';
+      const title = complianceEl.querySelector('.compliance-title');
+      const body = complianceEl.querySelector('.compliance-body');
+      title.textContent = data.compliance_passed ? '✅ Fair Housing Compliance: PASS' : '❌ Fair Housing Compliance: FAIL — Fix before posting';
+      body.textContent = data.compliance || '';
+      complianceEl.style.display = 'block';
+    } else {
+      alert('Error generating listing. Check your API key.');
+    }
+  } catch(e) {
+    alert('Error connecting to server.');
+  }
+  document.getElementById('listing-loading').classList.remove('show');
+}
+
+function copyListing() {
+  const text = document.getElementById('listing-text').textContent;
+  navigator.clipboard.writeText(text);
+  alert('Copied to clipboard!');
+}
+
+async function loadLeads() {
+  const container = document.getElementById('leads-list');
+  try {
+    const res = await fetch('/api/leads/' + AGENT_ID);
+    const data = await res.json();
+
+    if (!data.leads || data.leads.length === 0) {
+      container.textContent = 'No leads yet. Embed the lead form on your website to start capturing leads.';
+      document.getElementById('stat-leads').textContent = '0';
+      return;
+    }
+
+    document.getElementById('stat-leads').textContent = data.leads.length;
+
+    const table = document.createElement('table');
+    table.className = 'leads-table';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Name</th><th>Phone</th><th>Email</th><th>Budget</th><th>Status</th><th>Received</th><th>Action</th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    data.leads.forEach(l => {
+      const tr = document.createElement('tr');
+
+      const statusClass = 'badge badge-' + esc(l.status);
+      const dateStr = l.created_at ? new Date(l.created_at).toLocaleDateString() : '—';
+
+      const nameTd = document.createElement('td');
+      const b = document.createElement('b');
+      b.textContent = l.name || '';
+      nameTd.appendChild(b);
+
+      const phoneTd = document.createElement('td');
+      phoneTd.textContent = l.phone || '';
+
+      const emailTd = document.createElement('td');
+      emailTd.textContent = l.email || '';
+
+      const budgetTd = document.createElement('td');
+      budgetTd.textContent = l.budget || '—';
+
+      const statusTd = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = statusClass;
+      badge.textContent = l.status || '';
+      statusTd.appendChild(badge);
+
+      const dateTd = document.createElement('td');
+      dateTd.textContent = dateStr;
+
+      const actionTd = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-green btn-sm';
+      btn.textContent = '▶ Start Sequence';
+      btn.onclick = () => startFollowup(l.id);
+      actionTd.appendChild(btn);
+
+      tr.append(nameTd, phoneTd, emailTd, budgetTd, statusTd, dateTd, actionTd);
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.textContent = '';
+    container.appendChild(table);
+  } catch(e) {
+    container.textContent = 'Could not load leads. Make sure the server is running.';
+  }
+}
+
+async function startFollowup(leadId) {
+  if (!confirm('Start automated 60-day follow-up sequence for this lead?')) return;
+  await fetch('/api/followups/start', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({lead_id: leadId, agent_id: AGENT_ID})
+  });
+  alert('Follow-up sequence started! AI will text this lead at day 3, 7, 14, 30, and 60.');
+}
+
+async function sendClientUpdates() {
+  const listingsText = document.getElementById('new-listings').value;
+  const listings = listingsText.split('\n').filter(l => l.trim());
+  document.getElementById('client-loading').classList.add('show');
+  const resultEl = document.getElementById('client-result');
+  resultEl.textContent = '';
+  try {
+    const res = await fetch('/api/clients/send-updates/' + AGENT_ID, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(listings)
+    });
+    const data = await res.json();
+    resultEl.textContent = '✅ ' + (data.message || 'Done');
+    resultEl.style.color = '#22c55e';
+  } catch(e) {
+    resultEl.textContent = 'Error sending updates.';
+    resultEl.style.color = '#e33';
+  }
+  document.getElementById('client-loading').classList.remove('show');
+}
+
+function setupSequence() {
+  const steps = [
+    { day: 'Now', color: '#4f8ef7', text: 'Instant — AI texts + emails lead within seconds of form submission' },
+    { day: '3',   color: '#7c3aed', text: 'Day 3 — "I have some new listings that might interest you..."' },
+    { day: '7',   color: '#0891b2', text: 'Day 7 — Market insight to stay top of mind' },
+    { day: '14',  color: '#d97706', text: 'Day 14 — Check if search criteria have changed' },
+    { day: '30',  color: '#dc2626', text: 'Day 30 — New listing alert in their area' },
+    { day: '60',  color: '#059669', text: 'Day 60 — Light market update to keep relationship warm' },
+  ];
+  const container = document.getElementById('sequence-steps');
+  container.textContent = '';
+  steps.forEach(step => {
+    const div = document.createElement('div');
+    div.className = 'sequence-step';
+
+    const badge = document.createElement('div');
+    badge.className = 'step-badge';
+    badge.style.background = step.color;
+    badge.textContent = step.day;
+
+    const text = document.createElement('div');
+    text.textContent = step.text;
+
+    div.appendChild(badge);
+    div.appendChild(text);
+    container.appendChild(div);
+  });
+}
+
+function setupEmbed() {
+  const origin = window.location.origin;
+  const code = `<!-- Real Estate AI Lead Form -->
+<form id="re-lead-form">
+  <input name="name" placeholder="Your Name" required>
+  <input name="email" type="email" placeholder="Email" required>
+  <input name="phone" type="tel" placeholder="Phone" required>
+  <input name="budget" placeholder="Budget (e.g. $400,000)">
+  <textarea name="message" placeholder="What are you looking for?"></textarea>
+  <button type="submit">Get Started</button>
+</form>
+<script>
+document.getElementById('re-lead-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.agent_id = "${AGENT_ID}";
+  await fetch('${origin}/api/leads/new', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+  e.target.textContent = 'Thanks! Your agent will be in touch shortly.';
+};
+<\/script>`;
+  document.getElementById('embed-code').textContent = code;
+}
+
+function copyEmbed() {
+  navigator.clipboard.writeText(document.getElementById('embed-code').textContent);
+  alert('Embed code copied!');
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/listings/' + AGENT_ID);
+    const data = await res.json();
+    document.getElementById('stat-listings').textContent = data.listings ? data.listings.length : 0;
+  } catch(e) {}
+}
+
+loadStats();
+</script>
+</body>
+</html>

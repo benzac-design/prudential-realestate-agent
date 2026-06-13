@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real Estate AI Agent — System Overview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .badge {
+      display: inline-block;
+      background: #1a2744;
+      color: #60a5fa;
+      border: 1px solid #2563eb44;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Section titles */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 20px;
+      margin-top: 48px;
+    }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      background: #161b2e;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 130px;
+    }
+    .flow-step .icon { font-size: 24px; margin-bottom: 8px; }
+    .flow-step .label { font-size: 13px; font-weight: 600; color: #cbd5e1; }
+    .flow-step .sub { font-size: 11px; color: #64748b; margin-top: 4px; }
+    .flow-arrow {
+      color: #334155;
+      font-size: 20px;
+      padding: 0 8px;
+      flex-shrink: 0;
+    }
+
+    /* Use case cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .card {
+      background: #161b2e;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #2563eb55; }
+    .card-accent {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .card-number {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+    .card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    .card-trigger {
+      background: #0f1117;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .card-trigger strong { color: #94a3b8; display: block; margin-bottom: 3px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    /* Stack overview */
+    .stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .stack-item {
+      background: #161b2e;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stack-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .stack-info .name { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+    .stack-info .role { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .metric {
+      background: #161b2e;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+    }
+    .metric .value {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .metric .desc {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding-top: 40px;
+      border-top: 1px solid #1e293b;
+      color: #475569;
+      font-size: 13px;
+    }
+
+    /* Color accents */
+    .blue { background: #3b82f6; }
+    .green { background: #22c55e; }
+    .purple { background: #a855f7; }
+    .orange { background: #f97316; }
+    .pink { background: #ec4899; }
+    .yellow { background: #eab308; }
+
+    .text-blue { color: #60a5fa; }
+    .text-green { color: #4ade80; }
+    .text-purple { color: #c084fc; }
+    .text-orange { color: #fb923c; }
+    .text-pink { color: #f472b6; }
+    .text-yellow { color: #facc15; }
+
+    .bg-blue { background: #1e3a5f; }
+    .bg-green { background: #14532d; }
+    .bg-purple { background: #3b0764; }
+    .bg-orange { background: #431407; }
+    .bg-pink { background: #500724; }
+    .bg-yellow { background: #422006; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="badge">System Overview</div>
+      <h1>Real Estate AI Agent</h1>
+      <p class="subtitle">An automated backend system that handles lead follow-up, showing bookings, listing creation, and client updates — so real estate agents can focus on closing deals.</p>
+    </div>
+
+    <!-- How it works flow -->
+    <div class="section-title">How It Works</div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="icon">🧑</div>
+        <div class="label">Lead Submits</div>
+        <div class="sub">Fills out form</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">⚡</div>
+        <div class="label">AI Activates</div>
+        <div class="sub">Within seconds</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">📱</div>
+        <div class="label">SMS + Email</div>
+        <div class="sub">Auto-sent to lead</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">🗓️</div>
+        <div class="label">60-Day Sequence</div>
+        <div class="sub">Scheduled follow-ups</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="icon">🏠</div>
+        <div class="label">Deal Closed</div>
+        <div class="sub">Agent gets paid</div>
+      </div>
+    </div>
+
+    <!-- Use Cases -->
+    <div class="section-title">5 Core Use Cases</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-accent blue"></div>
+        <div class="card-number">Use Case 01</div>
+        <h3>Instant Lead Follow-Up</h3>
+        <p>The moment a lead fills out a contact form, the AI sends a personalised SMS and email within seconds — before any competitor can respond.</p>
+        <div class="card-trigger">
+          <strong>Trigger</strong>
+          New lead form submitted → SMS + Email sent automatically
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-accent green"></div>
+        <div class="card-number">Use Case 02</div>
+        <h3>Automatic Showing Bookings</h3>
+        <p>The AI qualifies leads by asking about budget, timeline, and pre-approval status, then books a showing or call via Calendly — no back-and-forth needed.</p>
+        <div class="card-trigger">
+          <strong>Trigger</strong>
+          Lead replies with interest → Booking link + qualification questions sent
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-accent purple"></div>
+        <div class="card-number">Use Case 03</div>
+        <h3>AI Listing Descriptions</h3>
+        <p>Agent enters property details and the AI writes a professional 150-200 word MLS listing, then automatically audits it for Fair Housing Act compliance.</p>
+        <div class="card-trigger">
+          <strong>Trigger</strong>
+          Agent submits property details → Listing + compliance audit returned instantly
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-accent orange"></div>
+        <div class="card-number">Use Case 04</div>
+        <h3>60-Day Follow-Up Sequence</h3>
+        <p>Every lead automatically receives 5 follow-up messages at Day 3, 7, 14, 30, and 60 — each AI-written and personalised to keep the relationship warm.</p>
+        <div class="card-trigger">
+          <strong>Trigger</strong>
+          Lead saved → Sequence scheduled, runs automatically every 30 mins
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-accent pink"></div>
+        <div class="card-number">Use Case 05</div>
+        <h3>Weekly Client Update Emails</h3>
+        <p>Every buyer client receives a weekly AI-written email with new matching listings, market updates, and an offer to schedule viewings — keeping them engaged.</p>
+        <div class="card-trigger">
+          <strong>Trigger</strong>
+          Agent clicks "Send Updates" → All buyer clients emailed in one click
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-accent yellow"></div>
+        <div class="card-number">Bonus Feature</div>
+        <h3>Fair Housing Compliance Audit</h3>
+        <p>Every generated listing is automatically scanned for Fair Housing Act violations — flagging risky phrases, listing violations, and suggesting exact fixes.</p>
+        <div class="card-trigger">
+          <strong>Result</strong>
+          PASS ✅ or FAIL ❌ with violation list and suggested replacement text
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="section-title">Technology Stack</div>
+    <div class="stack">
+      <div class="stack-item">
+        <div class="stack-icon bg-blue">🤖</div>
+        <div class="stack-info">
+          <div class="name">Claude AI</div>
+          <div class="role">AI brain (Sonnet 4.6)</div>
+        </div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-icon bg-green">🗄️</div>
+        <div class="stack-info">
+          <div class="name">Supabase</div>
+          <div class="role">Database</div>
+        </div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-icon bg-purple">📱</div>
+        <div class="stack-info">
+          <div class="name">Twilio</div>
+          <div class="role">SMS sending</div>
+        </div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-icon bg-orange">📧</div>
+        <div class="stack-info">
+          <div class="name">Resend</div>
+          <div class="role">Email sending</div>
+        </div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-icon bg-pink">⚙️</div>
+        <div class="stack-info">
+          <div class="name">FastAPI</div>
+          <div class="role">Backend server</div>
+        </div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-icon bg-yellow">🚀</div>
+        <div class="stack-info">
+          <div class="name">Railway</div>
+          <div class="role">Cloud hosting</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="section-title">Impact at a Glance</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="value text-blue">&lt;5s</div>
+        <div class="desc">Lead response time vs hours manually</div>
+      </div>
+      <div class="metric">
+        <div class="value text-green">20hrs</div>
+        <div class="desc">Saved per week for the agent</div>
+      </div>
+      <div class="metric">
+        <div class="value text-purple">60</div>
+        <div class="desc">Days of automated follow-up per lead</div>
+      </div>
+      <div class="metric">
+        <div class="value text-orange">$200</div>
+        <div class="desc">Per month per agent (SaaS pricing)</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Built with Claude AI · FastAPI · Supabase · Twilio · Resend · Railway
+    </div>
+
+  </div>
+</body>
+</html>
