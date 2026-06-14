@@ -3,7 +3,7 @@ import os
 
 _client = OpenAI(
     api_key=os.getenv("MINIMAX_API_KEY"),
-    base_url="https://api.minimax.chat/v1",
+    base_url="https://api.minimax.io/v1",
 )
 
 
