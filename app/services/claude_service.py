@@ -1,13 +1,18 @@
-import google.generativeai as genai
+from openai import OpenAI
 import os
 
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-model = genai.GenerativeModel("gemini-2.0-flash")
+_client = OpenAI(
+    api_key=os.getenv("MINIMAX_API_KEY"),
+    base_url="https://api.minimax.chat/v1",
+)
 
 
 def _ask(prompt: str) -> str:
-    response = model.generate_content(prompt)
-    return response.text
+    response = _client.chat.completions.create(
+        model="MiniMax-Text-01",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
 
 
 def generate_listing_description(address, bedrooms, bathrooms, sqft, price, features, neighborhood="", agent_name=""):
