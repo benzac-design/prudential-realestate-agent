@@ -15,21 +15,46 @@ def _ask(prompt: str) -> str:
     return response.choices[0].message.content
 
 
-def generate_listing_description(address, bedrooms, bathrooms, sqft, price, features, neighborhood="", agent_name=""):
-    prompt = f"""You are a professional real estate copywriter. Write a compelling MLS listing description.
+def generate_listing_description(address, bedrooms, bathrooms, sqm, price, features, neighborhood="", agent_name="", listing_type="sale"):
+    if listing_type == "rental":
+        prompt = f"""You are a professional real estate copywriter. Write a compelling rental listing description aimed at attracting quality tenants.
 
 Property Details:
 - Address: {address}
 - Bedrooms: {bedrooms} | Bathrooms: {bathrooms}
-- Square Feet: {sqft:,}
+- Size: {sqm:,} sqm
+- Weekly/Monthly Rent: ${price:,}
+- Key Features: {features}
+- Neighborhood: {neighborhood}
+- Leasing Agent: {agent_name}
+
+Write a 150-200 word rental listing description that:
+1. Opens with a strong hook that appeals to renters (lifestyle, convenience, move-in ready)
+2. Highlights features that matter most to tenants: proximity to transport/schools/shops, low-maintenance living, storage, parking, lease terms flexibility
+3. Mentions the neighborhood's everyday convenience for renters (commute, amenities)
+4. Ends with a call to action to book an inspection
+5. Uses warm, inviting, professional language suited to attracting reliable long-term tenants
+
+Return only the listing description, nothing else."""
+        return _ask(prompt)
+
+    audience = "first home buyers and investors looking for value and upside" if price < 1_000_000 else "owner-occupier homeowners looking for a forever home and lifestyle upgrade"
+    prompt = f"""You are a professional real estate copywriter. Write a compelling sale listing description.
+
+Property Details:
+- Address: {address}
+- Bedrooms: {bedrooms} | Bathrooms: {bathrooms}
+- Size: {sqm:,} sqm
 - Price: ${price:,}
 - Key Features: {features}
 - Neighborhood: {neighborhood}
 - Listing Agent: {agent_name}
 
+Target audience: {audience}
+
 Write a 150-200 word listing description that:
-1. Opens with a strong hook
-2. Highlights the best features naturally
+1. Opens with a strong hook tailored to the target audience above
+2. Highlights the best features naturally, emphasizing what matters to this audience (e.g. growth potential and affordability for first home buyers/investors, or lifestyle and long-term comfort for homeowners)
 3. Mentions the neighborhood appeal
 4. Ends with a call to action
 5. Uses professional real estate language

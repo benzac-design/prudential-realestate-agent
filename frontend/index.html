@@ -141,12 +141,19 @@
         <input type="number" id="bathrooms" placeholder="2.5" step="0.5" min="1">
       </div>
       <div class="form-group">
-        <label>Square Feet</label>
-        <input type="number" id="sqft" placeholder="2100">
+        <label>Size (sqm)</label>
+        <input type="number" id="sqm" placeholder="195">
       </div>
       <div class="form-group">
         <label>Listing Price ($)</label>
-        <input type="number" id="price" placeholder="450000">
+        <input type="number" id="price" placeholder="780000">
+      </div>
+      <div class="form-group">
+        <label>Listing Type</label>
+        <select id="listing-type">
+          <option value="sale">For Sale</option>
+          <option value="rental">For Rental</option>
+        </select>
       </div>
       <div class="form-group full">
         <label>Key Features (comma separated)</label>
@@ -240,11 +247,12 @@ async function generateListing() {
   const address = document.getElementById('address').value;
   const bedrooms = document.getElementById('bedrooms').value;
   const bathrooms = document.getElementById('bathrooms').value;
-  const sqft = document.getElementById('sqft').value;
+  const sqm = document.getElementById('sqm').value;
   const price = document.getElementById('price').value;
   const features = document.getElementById('features').value;
+  const listingType = document.getElementById('listing-type').value;
 
-  if (!address || !bedrooms || !bathrooms || !sqft || !price || !features) {
+  if (!address || !bedrooms || !bathrooms || !sqm || !price || !features) {
     alert('Please fill in all required fields.');
     return;
   }
@@ -258,9 +266,10 @@ async function generateListing() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         address, bedrooms: parseInt(bedrooms), bathrooms: parseFloat(bathrooms),
-        sqft: parseInt(sqft), price: parseInt(price), features,
+        sqm: parseInt(sqm), price: parseInt(price), features,
         neighborhood: document.getElementById('neighborhood').value,
         agent_name: document.getElementById('agent-name').value,
+        listing_type: listingType,
       })
     });
     const data = await res.json();

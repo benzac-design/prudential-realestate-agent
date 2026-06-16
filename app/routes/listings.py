@@ -13,11 +13,12 @@ async def generate_listing(request: ListingRequest):
             address=request.address,
             bedrooms=request.bedrooms,
             bathrooms=request.bathrooms,
-            sqft=request.sqft,
+            sqm=request.sqm,
             price=request.price,
             features=request.features,
             neighborhood=request.neighborhood,
             agent_name=request.agent_name,
+            listing_type=request.listing_type,
         )
         compliance = audit_fair_housing_compliance(description)
         passed = compliance.startswith("RESULT: PASS")

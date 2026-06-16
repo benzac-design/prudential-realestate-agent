@@ -7,11 +7,12 @@ class ListingRequest(BaseModel):
     address: str
     bedrooms: int
     bathrooms: float
-    sqft: int
+    sqm: int
     price: int
     features: str
     neighborhood: Optional[str] = ""
     agent_name: Optional[str] = ""
+    listing_type: Optional[str] = "sale"  # "sale" or "rental"
 
 
 class LeadForm(BaseModel):
