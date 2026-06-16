@@ -162,7 +162,11 @@
       <div class="icon">🏠</div>
       <div class="label">Real Estate Agent</div>
     </div>
-
+    <div class="biz-card" onclick="selectBusiness('finadvisor', this)" style="border-color:rgba(212,168,67,0.4);">
+      <div class="icon">💼</div>
+      <div class="label" style="color:#d4a843;">Financial Advisor</div>
+      <div class="coming-soon" style="color:#d4a843;font-weight:600;">New ★</div>
+    </div>
     <div class="biz-card" onclick="selectBusiness('restaurant', this)">
       <div class="icon">🍽️</div>
       <div class="label">Restaurant</div>
@@ -353,6 +357,161 @@
   </div>
 </section>
 
+<!-- FINANCIAL ADVISOR PITCH -->
+<section id="pitch-finadvisor" class="pitch">
+  <div class="pitch-header reveal">
+    <h2>Built for <span style="color:#d4a843;">Financial Advisors</span></h2>
+    <p>Stop chasing leads and drowning in admin. Your AI agent follows up every enquiry in seconds, onboards clients, writes ASIC-compliant briefs, and keeps every client engaged — 24/7.</p>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant Lead Follow-Up</h3>
+      <p>Someone enquires at 10pm — your AI texts and emails them within seconds. You wake up to a warm, qualified conversation already started.</p>
+      <span class="feature-tag">Never lose a lead again</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📝</div>
+      <h3>Smart Client Onboarding</h3>
+      <p>AI analyses each new client's income, super, goals and debt — then hands you a full profile with opportunities, risk flags, and a ready-made meeting agenda.</p>
+      <span class="feature-tag">Hours of prep in seconds</span>
+    </div>
+    <div class="feature-card" style="border-color:rgba(212,168,67,0.4);background:rgba(212,168,67,0.04);">
+      <div class="feature-icon">⚖️</div>
+      <h3>ASIC Compliance Checker</h3>
+      <p>Every email, ad, and brief is audited against the Corporations Act, RG 175 and RG 234 before it goes out. PASS/FAIL with exact fixes. Protect your licence.</p>
+      <span class="feature-tag" style="background:rgba(212,168,67,0.15);color:#d4a843;">Protects your licence</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Personalised Investment Briefs</h3>
+      <p>Compliance-safe education documents tailored to each client's life stage — super strategies, EOFY planning, asset allocation — written in minutes.</p>
+      <span class="feature-tag">Saves 4+ hrs/week</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <h3>60-Day Lead Nurture</h3>
+      <p>Leads who aren't ready today get smart, personalised follow-ups at day 3, 7, 14, 30 and 60 — including EOFY-aware messages — until they book.</p>
+      <span class="feature-tag">Runs 100% on autopilot</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📧</div>
+      <h3>Weekly Market Updates</h3>
+      <p>Every client gets a personalised, compliant market update email each week — ASX, RBA rates, super context. One click sends to everyone.</p>
+      <span class="feature-tag">Clients feel looked after</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧠</div>
+      <h3>AI Memory</h3>
+      <p>The AI remembers every conversation with every lead and client. By day 30 it knows their goals, concerns and history — every message gets more personal over time.</p>
+      <span class="feature-tag">Gets smarter every day</span>
+    </div>
+  </div>
+
+  <!-- TIME SAVED -->
+  <div class="time-section reveal">
+    <h2>Get Your Week Back</h2>
+    <div class="sub">Hours saved per week for a typical solo financial advisor</div>
+    <div class="time-bars">
+      <div class="time-bar">
+        <div class="time-bar-label">Lead follow-up & nurturing</div>
+        <div class="bar-track"><div class="bar-fill" data-width="90"></div></div>
+        <div class="time-hours">9 hrs/wk</div>
+      </div>
+      <div class="time-bar">
+        <div class="time-bar-label">Client onboarding & notes</div>
+        <div class="bar-track"><div class="bar-fill" data-width="75"></div></div>
+        <div class="time-hours">8 hrs/wk</div>
+      </div>
+      <div class="time-bar">
+        <div class="time-bar-label">Writing briefs & documents</div>
+        <div class="bar-track"><div class="bar-fill" data-width="65"></div></div>
+        <div class="time-hours">7 hrs/wk</div>
+      </div>
+      <div class="time-bar">
+        <div class="time-bar-label">Client update emails</div>
+        <div class="bar-track"><div class="bar-fill" data-width="45"></div></div>
+        <div class="time-hours">5 hrs/wk</div>
+      </div>
+      <div class="time-bar">
+        <div class="time-bar-label">Compliance review</div>
+        <div class="bar-track"><div class="bar-fill" data-width="28"></div></div>
+        <div class="time-hours">3 hrs/wk</div>
+      </div>
+    </div>
+    <div class="time-total">
+      <div class="big">32 hrs</div>
+      <div class="label">saved every single week — that's 128 hours per month back in your life</div>
+    </div>
+  </div>
+
+  <!-- MONEY -->
+  <div class="money-section reveal">
+    <h2>What's That Worth To You?</h2>
+    <div class="sub">Conservative numbers for a solo advisor. Your results scale with your client base.</div>
+    <div class="calc-grid">
+      <div class="calc-card">
+        <h3>Without the AI Agent</h3>
+        <div class="calc-item"><span class="name">Leads converted from fast follow-up</span><span class="val" style="color:#ef4444;">0 extra</span></div>
+        <div class="calc-item"><span class="name">Cold leads recovered</span><span class="val" style="color:#ef4444;">Most lost</span></div>
+        <div class="calc-item"><span class="name">Time on admin per week</span><span class="val" style="color:#ef4444;">20 hrs</span></div>
+        <div class="calc-total" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);">
+          <div class="amount" style="color:#ef4444;">$0</div>
+          <div class="per">extra revenue from AI</div>
+        </div>
+      </div>
+      <div class="calc-card" style="border-color:rgba(34,197,94,0.2);">
+        <h3>With the AI Agent</h3>
+        <div class="calc-item"><span class="name">Extra clients/month from fast follow-up</span><span class="val">+2</span></div>
+        <div class="calc-item"><span class="name">Value per new client (AUM fees)</span><span class="val">$5,000+/yr</span></div>
+        <div class="calc-item"><span class="name">Cold leads recovered by nurture</span><span class="val">+$20,000/yr</span></div>
+        <div class="calc-total">
+          <div class="amount">$100,000+</div>
+          <div class="per">potential added revenue per year — 16x return on $500/month</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div class="compare-section reveal">
+    <h2>AI Agent vs Hiring Staff</h2>
+    <div class="sub">A part-time admin assistant costs $35,000+/year — and still goes home at 5pm</div>
+    <div class="compare-table">
+      <div class="compare-header"></div>
+      <div class="compare-header">Human Assistant</div>
+      <div class="compare-header highlight">AI Agent</div>
+      <div class="compare-cell">Cost per month</div>
+      <div class="compare-cell bad">$3,000–$6,000</div>
+      <div class="compare-cell highlight good">$500</div>
+      <div class="compare-cell">Responds to leads</div>
+      <div class="compare-cell bad">Business hours only</div>
+      <div class="compare-cell highlight good">24/7 in seconds</div>
+      <div class="compare-cell">ASIC compliance knowledge</div>
+      <div class="compare-cell bad">Needs training</div>
+      <div class="compare-cell highlight good">Built in</div>
+      <div class="compare-cell">Remembers every client</div>
+      <div class="compare-cell bad">Sometimes</div>
+      <div class="compare-cell highlight good">Always — AI memory</div>
+      <div class="compare-cell">Never calls in sick</div>
+      <div class="compare-cell bad">❌</div>
+      <div class="compare-cell highlight good">✅</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <h2>Ready to Put Your Practice on Autopilot?</h2>
+    <p>Get set up in under 24 hours. Your AI agent will be following up leads and writing compliant briefs by tomorrow.</p>
+    <div class="cta-buttons">
+      <button class="btn-big btn-blue" style="background:#d4a843;color:#14110a;" onclick="openContact()">Get Started — $500/month</button>
+      <button class="btn-big btn-outline" onclick="openContact()">Book a Free Demo</button>
+    </div>
+    <div class="price-note">No contracts. Cancel anytime. Setup included. Built for Australian advisors.</div>
+  </div>
+</section>
+
 <!-- COMING SOON PITCH -->
 <section id="pitch-other" class="pitch">
   <div class="pitch-header">
@@ -431,6 +590,9 @@ function selectBusiness(type, el) {
 
   if (type === 'realestate') {
     document.getElementById('pitch-realestate').classList.add('show');
+    setTimeout(animateBars, 300);
+  } else if (type === 'finadvisor') {
+    document.getElementById('pitch-finadvisor').classList.add('show');
     setTimeout(animateBars, 300);
   } else {
     document.getElementById('pitch-other').classList.add('show');
