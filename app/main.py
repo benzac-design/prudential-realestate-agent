@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,8 +9,8 @@ from pathlib import Path
 
 load_dotenv()
 
-from app.routes import listings, leads, followups, clients
-from app.scheduler import process_pending_followups
+from app.routes import listings, leads, followups, clients, conversations, appointments, stats, valuation, reports
+from app.scheduler import process_pending_followups, send_appointment_reminders
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -29,6 +30,11 @@ app.include_router(listings.router, prefix="/api")
 app.include_router(leads.router, prefix="/api")
 app.include_router(followups.router, prefix="/api")
 app.include_router(clients.router, prefix="/api")
+app.include_router(conversations.router, prefix="/api")
+app.include_router(appointments.router, prefix="/api")
+app.include_router(stats.router, prefix="/api")
+app.include_router(valuation.router, prefix="/api")
+app.include_router(reports.router, prefix="/api")
 
 
 @app.get("/")
@@ -38,7 +44,8 @@ async def dashboard(request: Request):
 
 @app.get("/prudential-demo")
 async def prudential_demo(request: Request):
-    return templates.TemplateResponse("prudential-demo.html", {"request": request})
+    # Retired — canonical demo now lives at the dusky link. Redirect any old traffic there.
+    return RedirectResponse("https://prudential-demo-dusky.vercel.app/", status_code=308)
 
 
 @app.get("/sales")
@@ -59,4 +66,5 @@ async def health():
 @app.get("/api/process-followups")
 async def run_followups():
     await process_pending_followups()
+    await send_appointment_reminders()
     return {"status": "ok"}
