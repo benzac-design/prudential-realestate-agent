@@ -267,6 +267,58 @@ Rules:
     return _ask(prompt)
 
 
+def generate_rent_reminder(tenant_name, address, amount, due_date, agent_name="", rent_period="week"):
+    """Friendly heads-up to a tenant that rent is coming due shortly."""
+    prompt = f"""You are {agent_name or 'the property manager'}, sending a tenant a friendly reminder that their rent is due soon.
+
+Tenant: {tenant_name}
+Property: {address}
+Rent: ${amount:g} per {rent_period}
+Due date: {due_date}
+
+Rules:
+- Max 300 characters, warm and polite (this is a courtesy reminder, NOT a demand)
+- Mention the amount and due date
+- Thank them / keep it light
+- Return only the SMS/message text, nothing else."""
+    return _ask(prompt)
+
+
+def generate_arrears_notice(tenant_name, address, amount, days_overdue, agent_name="", rent_period="week"):
+    """Polite-but-firm notice to a tenant whose rent is overdue (arrears)."""
+    prompt = f"""You are {agent_name or 'the property manager'}, contacting a tenant whose rent is overdue.
+
+Tenant: {tenant_name}
+Property: {address}
+Amount owing: ${amount:g} per {rent_period}
+Days overdue: {days_overdue}
+
+Rules:
+- Max 320 characters. Professional, respectful, but clear that payment is now due.
+- State the amount owing and that it is {days_overdue} day(s) overdue.
+- Ask them to pay as soon as possible or reply if there's a problem so you can help.
+- Do NOT threaten eviction or legal action — keep it solution-focused.
+- Return only the SMS/message text, nothing else."""
+    return _ask(prompt)
+
+
+def generate_inspection_notice(tenant_name, address, inspection_date, agent_name=""):
+    """Friendly, compliant notice to a tenant that a routine inspection is scheduled."""
+    prompt = f"""You are {agent_name or 'the property manager'}, notifying a tenant of an upcoming routine inspection.
+
+Tenant: {tenant_name}
+Property: {address}
+Proposed inspection date: {inspection_date}
+
+Rules:
+- Max 320 characters. Warm, professional, respectful of their home.
+- State it's a routine periodic inspection and give the proposed date.
+- Make clear this is advance written notice and invite them to reply if the time doesn't suit so it can be rearranged.
+- Reassure them it's brief and standard.
+- Return only the message text, nothing else."""
+    return _ask(prompt)
+
+
 def triage_maintenance_request(tenant_name, address, message, agent_name=""):
     """A tenant reports a maintenance issue by SMS/email. Classify urgency, summarise
     the problem for the landlord/tradesperson, and write a reassuring reply to the tenant.

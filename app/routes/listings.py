@@ -30,6 +30,21 @@ async def generate_listing(request: ListingRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class AuditRequest(BaseModel):
+    description: str
+
+
+@router.post("/audit")
+async def audit_listing(request: AuditRequest):
+    """Run a Fair Housing Act compliance check on any listing description."""
+    try:
+        compliance = audit_fair_housing_compliance(request.description)
+        passed = compliance.startswith("RESULT: PASS")
+        return {"success": True, "compliance": compliance, "compliance_passed": passed}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/save")
 async def save_listing_route(request: ListingRequest, description: str, agent_id: str):
     try:

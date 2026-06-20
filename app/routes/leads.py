@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel
 from app.models.schemas import LeadForm
+from app.auth import require_dashboard_auth
 from app.services.claude_service import generate_lead_followup_sms, generate_lead_followup_email, generate_conversation_reply
 from app.services.twilio_service import send_sms
 from app.services.resend_service import send_email, text_to_html
@@ -63,7 +64,7 @@ async def new_lead(lead: LeadForm, background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{agent_id}")
+@router.get("/{agent_id}", dependencies=[Depends(require_dashboard_auth)])
 async def list_leads(agent_id: str):
     try:
         leads = get_leads(agent_id)
@@ -72,7 +73,7 @@ async def list_leads(agent_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.patch("/{lead_id}/status")
+@router.patch("/{lead_id}/status", dependencies=[Depends(require_dashboard_auth)])
 async def update_status(lead_id: str, status: str):
     try:
         update_lead_status(lead_id, status)
@@ -95,7 +96,7 @@ def _send_reengage(lead: dict, agent_name: str, agency: str):
         save_message(lead["id"], lead.get("agent_id", "default"), "outbound", reply)
 
 
-@router.post("/reengage")
+@router.post("/reengage", dependencies=[Depends(require_dashboard_auth)])
 async def reengage_leads(req: ReengageRequest, background_tasks: BackgroundTasks):
     """Blast a personalised AI re-engagement SMS to a cold/dormant/unqualified segment."""
     try:

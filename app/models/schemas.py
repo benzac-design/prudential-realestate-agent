@@ -99,6 +99,42 @@ class LeaseRenewalRequest(BaseModel):
     agent_id: Optional[str] = ""
 
 
+class LeaseRecord(BaseModel):
+    agent_id: str
+    tenant_name: str
+    address: str
+    current_rent: float
+    lease_end: str                     # ISO date (YYYY-MM-DD)
+    rent_period: Optional[str] = "week"
+    tenure: Optional[str] = ""
+    market_context: Optional[str] = ""
+    tenant_phone: Optional[str] = ""
+    tenant_email: Optional[str] = ""
+
+
+class RentPaymentRecord(BaseModel):
+    agent_id: str
+    tenant_name: str
+    address: str
+    amount: float
+    due_date: str                      # ISO date (YYYY-MM-DD)
+    rent_period: Optional[str] = "week"
+    lease_id: Optional[str] = None
+    tenant_phone: Optional[str] = ""
+    tenant_email: Optional[str] = ""
+
+
+class InspectionRecord(BaseModel):
+    agent_id: str
+    tenant_name: str
+    address: str
+    next_inspection_date: str          # ISO date (YYYY-MM-DD)
+    frequency_months: Optional[int] = 6
+    lease_id: Optional[str] = None
+    tenant_phone: Optional[str] = ""
+    tenant_email: Optional[str] = ""
+
+
 class AgentProfile(BaseModel):
     id: Optional[str] = None
     name: str

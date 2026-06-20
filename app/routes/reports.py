@@ -3,13 +3,19 @@ from fastapi.responses import HTMLResponse
 from datetime import datetime
 import os
 
-from app.services.supabase_service import get_agent_stats, get_leads_ranked
+from app.services.supabase_service import get_agent_stats, get_leads_ranked, get_rental_stats
 from app.services.resend_service import send_email
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
 
-def _build_report_html(stats: dict, top_leads: list, agent_name: str, agency: str, month_label: str) -> str:
+def _build_report_html(stats: dict, top_leads: list, agent_name: str, agency: str, month_label: str, rental: dict = None) -> str:
+    rental = rental or {}
+    arrears_count   = rental.get("arrears_count", 0)
+    arrears_amount  = rental.get("arrears_amount", 0)
+    inspections_due = rental.get("inspections_due", 0)
+    renewals_due    = rental.get("renewals_due", 0)
+    arrears_amount_str = f"${arrears_amount:,.0f}"
     total       = stats.get("total_leads", 0)
     engaged     = stats.get("engaged", 0)
     qualified   = stats.get("qualified", 0)
@@ -148,6 +154,29 @@ def _build_report_html(stats: dict, top_leads: list, agent_name: str, agency: st
       </tr>
     </table>
 
+    <!-- Divider -->
+    <div style="border-top:1px solid #f0f0f0;margin:28px 0;"></div>
+
+    <!-- Rental portfolio -->
+    <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:20px;">Rental Portfolio — Managed Automatically</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div style="background:#fff7ed;border-radius:12px;padding:18px;border:1px solid #fed7aa;">
+        <div style="font-size:11px;color:#9a3412;text-transform:uppercase;letter-spacing:0.5px;">Rent Arrears</div>
+        <div style="font-size:36px;font-weight:700;color:#9a3412;margin:8px 0 4px;">{arrears_count}</div>
+        <div style="font-size:12px;color:#c2410c;">{arrears_amount_str} outstanding — AI chasing</div>
+      </div>
+      <div style="background:#f0f9ff;border-radius:12px;padding:18px;border:1px solid #bae6fd;">
+        <div style="font-size:11px;color:#075985;text-transform:uppercase;letter-spacing:0.5px;">Inspections Due</div>
+        <div style="font-size:36px;font-weight:700;color:#075985;margin:8px 0 4px;">{inspections_due}</div>
+        <div style="font-size:12px;color:#0369a1;">Next 30 days — notices auto-sent</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:12px;padding:18px;border:1px solid #bbf7d0;">
+        <div style="font-size:11px;color:#166534;text-transform:uppercase;letter-spacing:0.5px;">Renewals Due</div>
+        <div style="font-size:36px;font-weight:700;color:#166534;margin:8px 0 4px;">{renewals_due}</div>
+        <div style="font-size:12px;color:#15803d;">Next 90 days — none missed</div>
+      </div>
+    </div>
+
     <!-- Commission opportunity banner -->
     <div style="background:linear-gradient(135deg,#1a1a2e,#252d42);border-radius:12px;padding:20px 24px;margin-top:28px;">
       <div style="color:#8892a4;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Commission Opportunity in Pipeline</div>
@@ -190,10 +219,11 @@ async def preview_monthly_report(agent_id: str):
     try:
         stats = get_agent_stats(agent_id)
         top_leads = get_leads_ranked(agent_id)
+        rental = get_rental_stats(agent_id)
         agent_name = os.getenv("DEFAULT_AGENT_NAME", "Agent")
         agency     = os.getenv("DEFAULT_AGENCY", "")
         month_label = datetime.utcnow().strftime("%B %Y")
-        html = _build_report_html(stats, top_leads, agent_name, agency, month_label)
+        html = _build_report_html(stats, top_leads, agent_name, agency, month_label, rental)
         return HTMLResponse(content=html)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -205,6 +235,7 @@ async def send_monthly_report(agent_id: str):
     try:
         stats = get_agent_stats(agent_id)
         top_leads = get_leads_ranked(agent_id)
+        rental = get_rental_stats(agent_id)
         agent_name  = os.getenv("DEFAULT_AGENT_NAME", "Agent")
         agency      = os.getenv("DEFAULT_AGENCY", "")
         agent_email = os.getenv("DEFAULT_AGENT_EMAIL", "")
@@ -213,7 +244,7 @@ async def send_monthly_report(agent_id: str):
         if not agent_email:
             raise HTTPException(status_code=400, detail="DEFAULT_AGENT_EMAIL not set")
 
-        html = _build_report_html(stats, top_leads, agent_name, agency, month_label)
+        html = _build_report_html(stats, top_leads, agent_name, agency, month_label, rental)
         send_email(agent_email, f"Your AI Agent Report — {month_label}", html)
         return {"success": True, "message": f"Report emailed to {agent_email}"}
     except HTTPException:
