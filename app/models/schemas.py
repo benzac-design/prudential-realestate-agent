@@ -77,6 +77,28 @@ class ValuationRequest(BaseModel):
     agent_id: str
 
 
+class MaintenanceRequest(BaseModel):
+    tenant_name: str
+    address: str
+    message: str                       # what the tenant reported
+    tenant_phone: Optional[str] = ""
+    tenant_email: Optional[str] = ""
+    agent_id: Optional[str] = ""
+
+
+class LeaseRenewalRequest(BaseModel):
+    tenant_name: str
+    address: str
+    current_rent: float
+    lease_end: str                     # ISO date or plain text
+    rent_period: Optional[str] = "week"
+    tenure: Optional[str] = ""
+    market_context: Optional[str] = ""
+    tenant_phone: Optional[str] = ""
+    tenant_email: Optional[str] = ""
+    agent_id: Optional[str] = ""
+
+
 class AgentProfile(BaseModel):
     id: Optional[str] = None
     name: str

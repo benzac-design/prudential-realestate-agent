@@ -9,7 +9,7 @@ from pathlib import Path
 
 load_dotenv()
 
-from app.routes import listings, leads, followups, clients, conversations, appointments, stats, valuation, reports
+from app.routes import listings, leads, followups, clients, conversations, appointments, stats, valuation, reports, maintenance, renewals
 from app.scheduler import process_pending_followups, send_appointment_reminders
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,6 +35,8 @@ app.include_router(appointments.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(valuation.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
+app.include_router(maintenance.router, prefix="/api")
+app.include_router(renewals.router, prefix="/api")
 
 
 @app.get("/")

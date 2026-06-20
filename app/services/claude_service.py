@@ -267,6 +267,88 @@ Rules:
     return _ask(prompt)
 
 
+def triage_maintenance_request(tenant_name, address, message, agent_name=""):
+    """A tenant reports a maintenance issue by SMS/email. Classify urgency, summarise
+    the problem for the landlord/tradesperson, and write a reassuring reply to the tenant.
+
+    Returns a dict: urgency, category, summary, recommended_action, tenant_reply, eta.
+    Urgency is one of: emergency, urgent, routine.
+    """
+    system = f"""You are {agent_name or 'the property manager'}, triaging a maintenance request from a tenant named {tenant_name} at {address}.
+
+The tenant said:
+\"\"\"{message}\"\"\"
+
+Classify the issue and decide how fast it must be handled:
+- "emergency": immediate risk to safety or property (gas leak, burst pipe/flooding, no power, no heat in winter, security/lock failure, sewage). Same-day response.
+- "urgent": real disruption but not dangerous (no hot water, fridge/oven dead, blocked toilet with another available, persistent leak). 24-48 hours.
+- "routine": minor or cosmetic (dripping tap, squeaky door, cracked tile, garden, general wear). Schedule within the week.
+
+Pick the single best category: plumbing, electrical, appliance, heating_cooling, structural, pest, locks_security, garden, other.
+
+Write a short, warm reply to the tenant that acknowledges the issue, sets expectations on timing, and (for emergencies) tells them any immediate safety step.
+
+Respond with ONLY a JSON object, no other text:
+{{
+  "urgency": "<emergency|urgent|routine>",
+  "category": "<one category from the list>",
+  "summary": "<one-sentence summary for the landlord/tradesperson>",
+  "recommended_action": "<what the property manager should do next, one sentence>",
+  "eta": "<plain-language response window, e.g. 'same day', '24-48 hours', 'within the week'>",
+  "tenant_reply": "<the SMS/email reply to send the tenant, under 320 characters>"
+}}"""
+
+    result = _ask_json(system, [{"role": "user", "content": message}])
+    result.setdefault("urgency", "routine")
+    result.setdefault("category", "other")
+    result.setdefault("summary", message[:140])
+    result.setdefault("recommended_action", "Review and assign a tradesperson.")
+    result.setdefault("eta", "within the week")
+    result.setdefault("tenant_reply", f"Thanks {tenant_name}, we've logged your maintenance request and will be in touch shortly.")
+    return result
+
+
+def generate_lease_renewal_offer(tenant_name, address, current_rent, lease_end, agent_name="",
+                                 tenure="", market_context="", rent_period="week"):
+    """Draft a lease-renewal recommendation for an expiring tenancy: a sensible
+    suggested new rent (conservative, retention-focused) plus a renewal offer message
+    to send the tenant.
+
+    Returns a dict: suggested_rent, change_pct, rationale, retention_risk, tenant_message.
+    """
+    system = f"""You are {agent_name or 'the property manager'}, preparing a lease-renewal recommendation for a good tenant you want to keep.
+
+Tenancy:
+- Tenant: {tenant_name}
+- Property: {address}
+- Current rent: ${current_rent} per {rent_period}
+- Lease ends: {lease_end}
+- How long they've rented here: {tenure or 'not specified'}
+- Local market context: {market_context or 'not specified'}
+
+Recommend a new rent for the renewal. Be conservative and retention-focused: a modest increase in line with the market is far better than losing a reliable tenant to a long, costly vacancy. Never recommend an aggressive jump unless the market context clearly justifies it. If the market is soft or the tenant is excellent, holding rent flat can be the right call.
+
+Then write a warm, professional renewal offer message to send the tenant: thank them, propose the new rent and a 12-month renewal, and invite them to confirm or chat.
+
+Respond with ONLY a JSON object, no other text:
+{{
+  "suggested_rent": <number, the recommended new rent per {rent_period}, no dollar sign>,
+  "change_pct": "<percentage change vs current rent, e.g. '+3.2%' or '0%'>",
+  "rationale": "<one-to-two sentence justification for the property manager>",
+  "retention_risk": "<low|medium|high — risk of losing the tenant at this rent>",
+  "tenant_message": "<the renewal offer message to send the tenant, 60-120 words>"
+}}"""
+
+    result = _ask_json(system, [{"role": "user", "content": f"Recommend the renewal terms for {tenant_name} at {address}."}])
+    result.setdefault("suggested_rent", current_rent)
+    result.setdefault("change_pct", "0%")
+    result.setdefault("rationale", "Hold rent steady to retain a reliable tenant.")
+    result.setdefault("retention_risk", "low")
+    result.setdefault("tenant_message",
+                      f"Hi {tenant_name}, your lease at {address} is coming up for renewal. We'd love to have you stay on — happy to chat through the details whenever suits you.")
+    return result
+
+
 def generate_home_valuation(address, bedrooms, bathrooms, sqm, condition="", year_built="", recent_upgrades="", neighborhood="", agent_name=""):
     """Seller lead magnet: an estimated value range + talking points. This is a
     conversation starter, NOT a formal appraisal — the prompt makes that clear."""
