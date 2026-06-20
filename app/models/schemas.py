@@ -54,6 +54,29 @@ class ClientCriteria(BaseModel):
     property_type: str = "any"
 
 
+class AppointmentRequest(BaseModel):
+    lead_id: str
+    agent_id: str
+    scheduled_at: str          # ISO datetime
+    location: Optional[str] = ""
+    notes: Optional[str] = ""
+
+
+class ValuationRequest(BaseModel):
+    name: str
+    email: Optional[str] = ""
+    phone: Optional[str] = ""
+    address: str
+    bedrooms: int
+    bathrooms: float
+    sqm: int
+    condition: Optional[str] = ""
+    year_built: Optional[str] = ""
+    recent_upgrades: Optional[str] = ""
+    neighborhood: Optional[str] = ""
+    agent_id: str
+
+
 class AgentProfile(BaseModel):
     id: Optional[str] = None
     name: str

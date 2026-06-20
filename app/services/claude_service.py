@@ -1,5 +1,6 @@
 from openai import OpenAI
 import os
+import json
 
 _client = OpenAI(
     api_key=os.getenv("MINIMAX_API_KEY"),
@@ -13,6 +14,81 @@ def _ask(prompt: str) -> str:
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
+
+
+def _ask_json(system: str, history: list) -> dict:
+    """Run a chat turn that must return a JSON object. Defensive parse."""
+    messages = [{"role": "system", "content": system}] + history
+    response = _client.chat.completions.create(
+        model="MiniMax-Text-01",
+        messages=messages,
+    )
+    raw = response.choices[0].message.content or ""
+    # Strip code fences / surrounding prose, grab the first {...} block.
+    start, end = raw.find("{"), raw.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        raw = raw[start:end + 1]
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return {"reply": raw.strip() or "Thanks for your message! When works for a quick call?",
+                "budget": None, "timeline": None, "pre_approved": None,
+                "stage": "engaged", "intent": "other"}
+
+
+def generate_conversation_reply(lead: dict, history: list, agent_name: str, agency: str = "") -> dict:
+    """
+    Drive a two-way SMS conversation with a lead.
+
+    `history` is a list of {"role": "user"|"assistant", "content": str} turns,
+    oldest first, where "user" = the lead and "assistant" = the AI agent.
+
+    Returns a dict: reply, budget, timeline, pre_approved, stage, intent.
+    Intent is one of: qualifying, wants_showing, hot, not_interested, other.
+    """
+    known = []
+    if lead.get("budget"):
+        known.append(f"budget: {lead['budget']}")
+    if lead.get("timeline"):
+        known.append(f"timeline: {lead['timeline']}")
+    if lead.get("pre_approved") is not None:
+        known.append(f"pre-approved: {'yes' if lead['pre_approved'] else 'no'}")
+    known_text = "; ".join(known) if known else "nothing yet"
+
+    system = f"""You are {agent_name}, a friendly, professional real estate agent{f' at {agency}' if agency else ''}, texting with a lead named {lead.get('name', 'there')}.
+
+Your job over SMS:
+1. Build rapport and reply naturally to what they just said.
+2. Qualify them by gently learning, ONE question at a time, across the conversation:
+   - budget / price range
+   - timeline (how soon they want to buy/rent)
+   - whether they are pre-approved for finance
+3. Once they seem qualified and interested, offer to book a property viewing or a quick call.
+
+What you already know about this lead: {known_text}.
+Do NOT re-ask for info you already know. Ask at most ONE new question per message.
+{f'When they are ready to view a property or book a call, share this booking link so they can pick a time: {os.getenv("BOOKING_LINK")}' if os.getenv("BOOKING_LINK") else 'When they are ready to view a property or book a call, offer to set up a time and tell them the agent will confirm.'}
+
+Style rules:
+- Keep each reply under 320 characters (1-2 short sentences). Conversational, warm, never pushy or spammy.
+- Sound like a real person texting, not a brochure. No emojis unless they use them first.
+- Sign off only occasionally, not every message.
+
+Respond with ONLY a JSON object, no other text:
+{{
+  "reply": "<the SMS text to send back>",
+  "budget": "<budget if newly learned, else null>",
+  "timeline": "<timeline if newly learned, else null>",
+  "pre_approved": <true/false if newly learned, else null>,
+  "stage": "<engaged|qualifying|qualified|showing_requested|not_interested>",
+  "intent": "<qualifying|wants_showing|hot|not_interested|other>"
+}}"""
+
+    result = _ask_json(system, history)
+    result.setdefault("reply", "Thanks! When works for a quick call?")
+    for k in ("budget", "timeline", "pre_approved", "stage", "intent"):
+        result.setdefault(k, None)
+    return result
 
 
 def generate_listing_description(address, bedrooms, bathrooms, sqm, price, features, neighborhood="", agent_name="", listing_type="sale"):
@@ -163,4 +239,65 @@ Rules:
 - End with offer to schedule viewings
 
 Return only the subject line and email body."""
+    return _ask(prompt)
+
+
+def generate_property_match_sms(lead: dict, listing: dict, agent_name: str) -> str:
+    """Personalised SMS to send a lead when a new listing matches their criteria."""
+    prompt = f"""You are {agent_name}, a real estate agent. Write a short, natural SMS to a lead about a new listing that matches their criteria.
+
+Lead name: {lead.get('name', 'there')}
+Lead budget: {lead.get('budget') or 'not specified'}
+Lead timeline: {lead.get('timeline') or 'not specified'}
+
+New listing:
+- Address: {listing.get('address')}
+- Bedrooms: {listing.get('bedrooms')} bed / {listing.get('bathrooms')} bath
+- Price: ${listing.get('price'):,}
+- Key features: {listing.get('features') or 'not specified'}
+- Neighborhood: {listing.get('neighborhood') or ''}
+
+Rules:
+- Max 320 characters
+- Sound like a real person texting, not a bot
+- Mention 1-2 specific details that match what they want
+- End with a soft question ("want to take a look?" or "does this sound like what you're after?")
+- Do NOT use the word "criteria" or sound robotic
+- Return only the SMS text, nothing else."""
+    return _ask(prompt)
+
+
+def generate_home_valuation(address, bedrooms, bathrooms, sqm, condition="", year_built="", recent_upgrades="", neighborhood="", agent_name=""):
+    """Seller lead magnet: an estimated value range + talking points. This is a
+    conversation starter, NOT a formal appraisal — the prompt makes that clear."""
+    prompt = f"""You are an experienced local real estate agent preparing a friendly home value estimate for a potential seller. You do not have live MLS data, so give a reasoned estimate based on the details and general market logic, and be upfront that a precise figure needs an in-person appraisal.
+
+Property:
+- Address: {address}
+- Bedrooms: {bedrooms} | Bathrooms: {bathrooms}
+- Size: {sqm} sqm
+- Condition: {condition or "not specified"}
+- Year built: {year_built or "not specified"}
+- Recent upgrades: {recent_upgrades or "none mentioned"}
+- Neighborhood: {neighborhood or "not specified"}
+- Agent: {agent_name}
+
+Write a warm, professional response with these sections:
+
+ESTIMATED VALUE RANGE:
+[Give a sensible range, e.g. "$X - $Y", and one sentence on what drives it]
+
+WHAT'S WORKING IN YOUR FAVOR:
+- [2-3 bullets on value-positive factors from the details]
+
+WHAT COULD AFFECT THE PRICE:
+- [2-3 bullets, honest but encouraging]
+
+TO GET TOP DOLLAR:
+- [2-3 concrete, low-cost prep tips before listing]
+
+NEXT STEP:
+[Invite them to a free no-obligation in-person valuation with {agent_name} for an exact figure]
+
+Keep the whole thing under 250 words and end with a clear, friendly call to action."""
     return _ask(prompt)

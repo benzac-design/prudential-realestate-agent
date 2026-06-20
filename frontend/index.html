@@ -8,35 +8,36 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
 
-  .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: #1a1a2e; padding: 24px 16px; }
+  .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: #1a1a2e; padding: 24px 16px; overflow-y: auto; }
   .logo { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
   .logo span { color: #4f8ef7; }
   .tagline { color: #8892a4; font-size: 12px; margin-bottom: 32px; }
+  .nav-section { color: #4f5b70; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 6px 16px; }
   .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; color: #8892a4; cursor: pointer; margin-bottom: 4px; transition: all 0.2s; font-size: 14px; }
   .nav-item:hover, .nav-item.active { background: #252d42; color: #fff; }
   .nav-item .icon { font-size: 18px; }
 
   .main { margin-left: 240px; padding: 32px; }
-  .header { margin-bottom: 32px; }
+  .header { margin-bottom: 28px; }
   .header h1 { font-size: 26px; font-weight: 700; }
   .header p { color: #666; margin-top: 4px; }
 
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
   .stat-card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
   .stat-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
   .stat-value { font-size: 32px; font-weight: 700; margin-top: 8px; color: #1a1a2e; }
-  .stat-change { font-size: 12px; color: #22c55e; margin-top: 4px; }
+  .stat-sub { font-size: 12px; color: #22c55e; margin-top: 4px; }
 
   .section { background: #fff; border-radius: 14px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px; display: none; }
   .section.active { display: block; }
-  .section h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
 
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group.full { grid-column: 1 / -1; }
   label { font-size: 13px; font-weight: 500; color: #555; }
-  input, textarea, select { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; transition: border 0.2s; width: 100%; }
-  input:focus, textarea:focus { border-color: #4f8ef7; }
+  input, textarea, select { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; transition: border 0.2s; width: 100%; font-family: inherit; }
+  input:focus, textarea:focus, select:focus { border-color: #4f8ef7; }
   textarea { resize: vertical; min-height: 80px; }
 
   .btn { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
@@ -47,30 +48,68 @@
   .btn-green { background: #22c55e; color: #fff; }
   .btn-green:hover { background: #16a34a; }
 
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .badge-new { background: #dbeafe; color: #1d4ed8; }
+  .badge-contacted { background: #dcfce7; color: #166534; }
+  .badge-qualified { background: #fef9c3; color: #854d0e; }
+  .badge-engaged { background: #dcfce7; color: #166534; }
+  .badge-hot { background: #fee2e2; color: #b91c1c; }
+  .badge-warm { background: #ffedd5; color: #c2410c; }
+  .badge-cold { background: #e5e7eb; color: #4b5563; }
+  .badge-dead { background: #f3f4f6; color: #9ca3af; }
+  .badge-opted_out { background: #fef2f2; color: #9ca3af; }
+  .badge-scheduled { background: #ede9fe; color: #6d28d9; }
+  .badge-showing_requested { background: #ede9fe; color: #6d28d9; }
+
+  .score-bar { display: inline-block; width: 60px; height: 7px; border-radius: 4px; background: #eee; overflow: hidden; vertical-align: middle; }
+  .score-fill { height: 100%; border-radius: 4px; }
+
+  .call-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 10px; background: #f8faff; margin-bottom: 10px; border: 1px solid #eef2ff; gap: 12px; }
+  .call-row-left { flex: 1; min-width: 0; }
+  .call-name { font-weight: 600; font-size: 15px; }
+  .call-meta { font-size: 13px; color: #666; margin-top: 3px; }
+  .call-score-wrap { display: flex; align-items: center; gap: 4px; margin-right: 6px; }
+  .call-btn { background: #22c55e; color: #fff; text-decoration: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .call-btn:hover { background: #16a34a; }
+
+  .showing-row { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: 10px; background: #f8faff; margin-bottom: 10px; border: 1px solid #eef2ff; }
+  .showing-time { font-size: 13px; color: #4f8ef7; font-weight: 600; min-width: 140px; }
+  .showing-info { flex: 1; }
+  .showing-name { font-weight: 600; font-size: 14px; }
+  .showing-loc { font-size: 13px; color: #666; margin-top: 2px; }
+
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { text-align: left; padding: 10px 14px; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #f0f0f0; }
+  .leads-table td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+
   .result-box { background: #f8faff; border: 1.5px solid #e0e9ff; border-radius: 10px; padding: 20px; margin-top: 20px; white-space: pre-wrap; line-height: 1.7; font-size: 14px; }
   .compliance-pass { background: #f0fff4; border: 1.5px solid #22c55e; border-radius: 10px; padding: 16px; margin-top: 12px; }
   .compliance-fail { background: #fff5f5; border: 1.5px solid #ef4444; border-radius: 10px; padding: 16px; margin-top: 12px; }
   .compliance-title { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
   .compliance-body { font-size: 13px; white-space: pre-wrap; line-height: 1.7; color: #444; }
-  .copy-btn { margin-top: 12px; }
-
-  .leads-table { width: 100%; border-collapse: collapse; }
-  .leads-table th { text-align: left; padding: 10px 14px; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1.5px solid #f0f0f0; }
-  .leads-table td { padding: 14px; font-size: 14px; border-bottom: 1px solid #f5f5f5; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-  .badge-new { background: #dbeafe; color: #1d4ed8; }
-  .badge-contacted { background: #dcfce7; color: #166534; }
-  .badge-qualified { background: #fef9c3; color: #854d0e; }
-
-  .loading { display: none; color: #4f8ef7; font-size: 14px; margin-top: 12px; }
-  .loading.show { display: block; }
-
   .embed-code { background: #1a1a2e; color: #7dd3fc; border-radius: 10px; padding: 20px; font-family: monospace; font-size: 13px; margin-top: 16px; overflow-x: auto; white-space: pre; }
 
   .sequence-step { display: flex; align-items: center; gap: 16px; background: #f8f9fa; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
   .step-badge { border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; color: #fff; }
 
-  @media (max-width: 900px) { .form-grid, .stats { grid-template-columns: 1fr; } .sidebar { display: none; } .main { margin-left: 0; } }
+  .valuation-result { background: #f0fff4; border: 1.5px solid #22c55e; border-radius: 10px; padding: 20px; margin-top: 20px; white-space: pre-wrap; line-height: 1.8; font-size: 14px; }
+
+  .loading { display: none; color: #4f8ef7; font-size: 14px; margin-top: 12px; }
+  .loading.show { display: block; }
+
+  .banner { border-radius: 12px; padding: 18px 20px; border-left: 4px solid; margin-bottom: 20px; font-size: 14px; }
+  .banner-blue { background: #f0f7ff; border-color: #4f8ef7; }
+  .banner-green { background: #f0fff4; border-color: #22c55e; }
+
+  .empty { color: #888; text-align: center; padding: 40px; font-size: 14px; }
+
+  .re-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .re-card { background: #f8faff; border: 1px solid #eef2ff; border-radius: 10px; padding: 16px; }
+  .re-card-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+  .re-card-sub { font-size: 13px; color: #666; margin-bottom: 10px; }
+  .re-count { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+
+  @media (max-width: 900px) { .form-grid, .stats, .re-grid { grid-template-columns: 1fr; } .sidebar { display: none; } .main { margin-left: 0; } }
 </style>
 </head>
 <body>
@@ -79,12 +118,20 @@
   <div class="logo">Real Estate <span>AI</span></div>
   <div class="tagline">Your 24/7 AI Agent</div>
   <nav>
+    <div class="nav-section">Overview</div>
     <div class="nav-item active" onclick="showSection('dashboard', this)"><span class="icon">📊</span> Dashboard</div>
+    <div class="nav-item" onclick="showSection('calllist', this)"><span class="icon">🔥</span> Call List</div>
+    <div class="nav-item" onclick="showSection('showings', this)"><span class="icon">📅</span> Showings</div>
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" onclick="showSection('matching', this)"><span class="icon">🎯</span> Property Matching</div>
     <div class="nav-item" onclick="showSection('listings', this)"><span class="icon">🏠</span> Listing Descriptions</div>
-    <div class="nav-item" onclick="showSection('leads', this)"><span class="icon">👥</span> Leads</div>
+    <div class="nav-item" onclick="showSection('valuation', this)"><span class="icon">💰</span> Home Valuation</div>
+    <div class="nav-item" onclick="showSection('leads', this)"><span class="icon">👥</span> All Leads</div>
     <div class="nav-item" onclick="showSection('followups', this)"><span class="icon">📱</span> Follow-Up Sequences</div>
+    <div class="nav-item" onclick="showSection('reengagement', this)"><span class="icon">🔄</span> Re-Engagement</div>
     <div class="nav-item" onclick="showSection('clients', this)"><span class="icon">📧</span> Client Updates</div>
     <div class="nav-item" onclick="showSection('embed', this)"><span class="icon">🔗</span> Embed Lead Form</div>
+    <div class="nav-item" onclick="showSection('report', this)"><span class="icon">📄</span> Monthly Report</div>
   </nav>
 </div>
 
@@ -99,33 +146,133 @@
     <div class="stats">
       <div class="stat-card">
         <div class="stat-label">Total Leads</div>
-        <div class="stat-value" id="stat-leads">24</div>
-        <div class="stat-change">AI contacted all within seconds</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub" id="stat-hot-sub">Loading...</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Listings Created</div>
-        <div class="stat-value" id="stat-listings">31</div>
-        <div class="stat-change">Saved hours of writing</div>
+        <div class="stat-label">Reply Rate</div>
+        <div class="stat-value" id="stat-reply">—</div>
+        <div class="stat-sub">Leads who replied to AI</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Follow-Ups Sent</div>
-        <div class="stat-value">147</div>
-        <div class="stat-change">Running 24/7 in background</div>
+        <div class="stat-label">Messages Sent</div>
+        <div class="stat-value" id="stat-msgs">—</div>
+        <div class="stat-sub">By AI, not you</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Time Saved</div>
-        <div class="stat-value">18hrs</div>
-        <div class="stat-change">Every single week</div>
+        <div class="stat-label">Appointments</div>
+        <div class="stat-value" id="stat-appts">—</div>
+        <div class="stat-sub" id="stat-appts-sub">Booked by AI</div>
       </div>
     </div>
-    <div style="background:#f0f7ff;border-radius:12px;padding:20px;border-left:4px solid #4f8ef7;">
-      <b>Your AI agent is active and running.</b> It will automatically text and email new leads, schedule follow-up sequences, and send weekly client updates — all without you lifting a finger.
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="stat-card" style="background:linear-gradient(135deg,#fee2e2,#fef2f2);">
+        <div class="stat-label" style="color:#b91c1c;">🔥 Hot Leads</div>
+        <div class="stat-value" id="stat-hot" style="color:#b91c1c;">—</div>
+        <div class="stat-sub" style="color:#dc2626;">Score ≥ 70 — call these today</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#fef9c3,#fffbeb);">
+        <div class="stat-label" style="color:#854d0e;">🌡 Qualified</div>
+        <div class="stat-value" id="stat-qualified" style="color:#92400e;">—</div>
+        <div class="stat-sub" style="color:#b45309;">Budget + timeline confirmed</div>
+      </div>
+    </div>
+    <div class="banner banner-blue">
+      <strong>Your AI agent is active and running.</strong> It replies to new leads 24/7, qualifies them by budget and timeline, scores them, and tells you exactly who to call — all without you lifting a finger.
+    </div>
+  </div>
+
+  <!-- CALL LIST -->
+  <div id="calllist" class="section">
+    <div class="header">
+      <h1>🔥 Call List</h1>
+      <p>Your hottest leads, ranked by AI score. Call them in order.</p>
+    </div>
+    <div id="calllist-container"><div class="empty">Loading...</div></div>
+  </div>
+
+  <!-- SHOWINGS -->
+  <div id="showings" class="section">
+    <div class="header">
+      <h1>📅 Upcoming Showings</h1>
+      <p>Appointments booked by you or your AI. Reminders sent automatically 24hrs before.</p>
+    </div>
+    <div id="showings-container"><div class="empty">Loading...</div></div>
+    <div style="margin-top:24px;border-top:1px solid #f0f0f0;padding-top:20px;">
+      <div class="section-title">Book a Showing</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Lead ID</label>
+          <input type="text" id="appt-lead-id" placeholder="Lead ID from the Leads tab">
+        </div>
+        <div class="form-group">
+          <label>Date &amp; Time</label>
+          <input type="datetime-local" id="appt-datetime">
+        </div>
+        <div class="form-group full">
+          <label>Location / Address</label>
+          <input type="text" id="appt-location" placeholder="123 Main Street, Austin TX 78701">
+        </div>
+        <div class="form-group full">
+          <label>Notes (optional)</label>
+          <textarea id="appt-notes" placeholder="Gate code, parking instructions..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:16px;" onclick="bookShowing()">📅 Book Showing</button>
+      <div class="loading" id="appt-loading">Booking and sending confirmation...</div>
+      <div id="appt-result" style="margin-top:12px;font-size:14px;"></div>
+    </div>
+  </div>
+
+  <!-- PROPERTY MATCHING -->
+  <div id="matching" class="section">
+    <div class="header">
+      <h1>🎯 Property Matching</h1>
+      <p>Enter a new listing and AI will find every lead whose budget matches — then SMS them all instantly.</p>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Property Address</label>
+        <input type="text" id="match-address" placeholder="123 Main Street, Austin TX 78701">
+      </div>
+      <div class="form-group">
+        <label>Listing Price ($)</label>
+        <input type="number" id="match-price" placeholder="480000">
+      </div>
+      <div class="form-group">
+        <label>Bedrooms</label>
+        <input type="number" id="match-beds" placeholder="4" min="1">
+      </div>
+      <div class="form-group">
+        <label>Bathrooms</label>
+        <input type="number" id="match-baths" placeholder="2" step="0.5" min="1">
+      </div>
+      <div class="form-group">
+        <label>Neighborhood (optional)</label>
+        <input type="text" id="match-neighborhood" placeholder="South Congress">
+      </div>
+      <div class="form-group full">
+        <label>Key Features (optional)</label>
+        <input type="text" id="match-features" placeholder="pool, open plan kitchen, double garage">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;">
+      <button class="btn btn-secondary" onclick="findMatches(false)">🔍 Preview Matches</button>
+      <button class="btn btn-primary" onclick="findMatches(true)" id="blast-btn" style="display:none;">📱 Send AI SMS to All Matches</button>
+    </div>
+    <div class="loading" id="match-loading">Finding matching leads...</div>
+
+    <div id="match-results" style="display:none;margin-top:24px;">
+      <div id="match-summary" style="font-size:15px;font-weight:600;margin-bottom:16px;"></div>
+      <div id="match-list"></div>
+      <div id="match-sent" style="margin-top:16px;font-size:14px;color:#22c55e;display:none;"></div>
     </div>
   </div>
 
   <!-- LISTING DESCRIPTIONS -->
   <div id="listings" class="section">
-    <h2>🏠 Generate Listing Description</h2>
+    <h2 class="section-title">🏠 Generate Listing Description</h2>
     <p style="color:#666;margin-bottom:20px;font-size:14px;">Enter your property details and AI will write a professional MLS listing description in seconds.</p>
     <div class="form-grid">
       <div class="form-group full">
@@ -172,7 +319,7 @@
     <div class="loading" id="listing-loading">AI is writing your listing description...</div>
     <div id="listing-result" style="display:none;">
       <div class="result-box" id="listing-text"></div>
-      <button class="btn btn-secondary btn-sm copy-btn" onclick="copyListing()">📋 Copy to Clipboard</button>
+      <button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="copyListing()">📋 Copy to Clipboard</button>
       <div id="compliance-result" style="display:none;">
         <div class="compliance-title"></div>
         <div class="compliance-body"></div>
@@ -180,30 +327,118 @@
     </div>
   </div>
 
-  <!-- LEADS -->
-  <div id="leads" class="section">
-    <h2>👥 Lead Management</h2>
-    <p style="color:#666;margin-bottom:20px;font-size:14px;">All leads are automatically contacted by AI the moment they fill out your form.</p>
-    <div id="leads-list">
-      <div style="color:#888;text-align:center;padding:40px;">Loading leads...</div>
+  <!-- HOME VALUATION -->
+  <div id="valuation" class="section">
+    <h2 class="section-title">💰 Home Valuation — Seller Lead Magnet</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">Enter a seller's property details. AI generates an instant valuation estimate, emails it to the seller, and captures them as a seller lead.</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Seller Name</label>
+        <input type="text" id="val-name" placeholder="John Smith">
+      </div>
+      <div class="form-group">
+        <label>Seller Email</label>
+        <input type="email" id="val-email" placeholder="john@email.com">
+      </div>
+      <div class="form-group">
+        <label>Seller Phone (optional)</label>
+        <input type="tel" id="val-phone" placeholder="+1 512 000 0000">
+      </div>
+      <div class="form-group">
+        <label>Property Address</label>
+        <input type="text" id="val-address" placeholder="456 Oak Ave, Austin TX 78702">
+      </div>
+      <div class="form-group">
+        <label>Bedrooms</label>
+        <input type="number" id="val-bed" placeholder="3" min="1">
+      </div>
+      <div class="form-group">
+        <label>Bathrooms</label>
+        <input type="number" id="val-bath" placeholder="2" step="0.5" min="1">
+      </div>
+      <div class="form-group">
+        <label>Size (sqm)</label>
+        <input type="number" id="val-sqm" placeholder="180">
+      </div>
+      <div class="form-group">
+        <label>Condition</label>
+        <select id="val-condition">
+          <option value="excellent">Excellent</option>
+          <option value="good" selected>Good</option>
+          <option value="fair">Fair</option>
+          <option value="needs work">Needs Work</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Year Built</label>
+        <input type="number" id="val-year" placeholder="2005">
+      </div>
+      <div class="form-group">
+        <label>Neighborhood (optional)</label>
+        <input type="text" id="val-neighborhood" placeholder="Barton Hills">
+      </div>
+      <div class="form-group full">
+        <label>Recent Upgrades (optional)</label>
+        <input type="text" id="val-upgrades" placeholder="New kitchen 2022, roof replaced 2020">
+      </div>
     </div>
+    <button class="btn btn-primary" style="margin-top:20px;" onclick="requestValuation()">🏠 Generate Valuation &amp; Capture Lead</button>
+    <div class="loading" id="val-loading">AI is generating the valuation and emailing it to the seller...</div>
+    <div id="val-result" style="display:none;"></div>
+  </div>
+
+  <!-- ALL LEADS -->
+  <div id="leads" class="section">
+    <h2 class="section-title">👥 All Leads</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">All leads are automatically contacted by AI the moment they fill out your form.</p>
+    <div id="leads-list"><div class="empty">Loading leads...</div></div>
   </div>
 
   <!-- FOLLOW-UP SEQUENCES -->
   <div id="followups" class="section">
-    <h2>📱 Follow-Up Sequences</h2>
+    <h2 class="section-title">📱 Follow-Up Sequences</h2>
     <p style="color:#666;margin-bottom:20px;font-size:14px;">AI automatically texts cold leads at day 3, 7, 14, 30, and 60. You do nothing.</p>
-    <div style="background:#f0fff4;border-radius:12px;padding:20px;border-left:4px solid #22c55e;margin-bottom:24px;">
-      <b>✅ Sequences are running automatically</b><br>
-      <span style="font-size:13px;color:#555;">Every new lead is automatically enrolled in a 60-day follow-up sequence.</span>
+    <div class="banner banner-green">
+      <strong>✅ Sequences are running automatically</strong><br>
+      <span style="font-size:13px;color:#555;">Every new lead is enrolled in a 60-day follow-up sequence. If a lead replies at any point, the sequence pauses and the AI takes over the conversation.</span>
     </div>
     <h3 style="margin-bottom:16px;font-size:15px;">Sequence Timeline</h3>
     <div id="sequence-steps"></div>
   </div>
 
+  <!-- RE-ENGAGEMENT -->
+  <div id="reengagement" class="section">
+    <h2 class="section-title">🔄 Re-Engagement Campaigns</h2>
+    <p style="color:#666;margin-bottom:20px;font-size:14px;">Automatically re-engage cold or silent leads with a personalized AI message blast.</p>
+    <div class="re-grid">
+      <div class="re-card">
+        <div class="re-card-title">🧊 Cold Leads</div>
+        <div class="re-card-sub">Score below 40, haven't replied yet</div>
+        <div class="re-count" id="cold-count">—</div>
+        <button class="btn btn-primary btn-sm" onclick="triggerReengage('cold')">Send AI Message</button>
+      </div>
+      <div class="re-card">
+        <div class="re-card-title">💤 Dormant</div>
+        <div class="re-card-sub">No activity in 30+ days — market update nudge</div>
+        <div class="re-count" id="dormant-count">—</div>
+        <button class="btn btn-primary btn-sm" onclick="triggerReengage('dormant')">Send AI Message</button>
+      </div>
+      <div class="re-card">
+        <div class="re-card-title">🔍 Unqualified</div>
+        <div class="re-card-sub">Replied but never gave budget or timeline</div>
+        <div class="re-count" id="unqualified-count">—</div>
+        <button class="btn btn-primary btn-sm" onclick="triggerReengage('unqualified')">Qualify Now</button>
+      </div>
+    </div>
+    <div class="banner banner-blue">
+      <strong>How re-engagement works:</strong> The AI sends a natural, personalised message based on the lead's history. If they reply, the two-way AI conversation restarts automatically. Opted-out leads are always skipped.
+    </div>
+    <div id="reengage-result" style="margin-top:16px;font-size:14px;"></div>
+  </div>
+
   <!-- CLIENT UPDATES -->
   <div id="clients" class="section">
-    <h2>📧 Weekly Client Updates</h2>
+    <h2 class="section-title">📧 Weekly Client Updates</h2>
     <p style="color:#666;margin-bottom:20px;font-size:14px;">Send AI-written weekly property updates to all your buyer clients at once.</p>
     <div class="form-group" style="margin-bottom:16px;">
       <label>New Listings This Week (one per line)</label>
@@ -211,12 +446,31 @@
     </div>
     <button class="btn btn-primary" onclick="sendClientUpdates()">📨 Send Updates to All Clients</button>
     <div class="loading" id="client-loading">Sending AI-written updates to all clients...</div>
-    <div id="client-result"></div>
+    <div id="client-result" style="margin-top:12px;font-size:14px;"></div>
+  </div>
+
+  <!-- MONTHLY REPORT -->
+  <div id="report" class="section">
+    <div class="header">
+      <h1>📄 Monthly Report</h1>
+      <p>A full AI performance report — email it to yourself or preview it in the browser.</p>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+      <button class="btn btn-primary" onclick="sendReport()">📧 Email Report to Me</button>
+      <a id="preview-report-link" class="btn btn-secondary" target="_blank">👁 Preview in Browser</a>
+    </div>
+    <div class="loading" id="report-loading">Generating and sending your report...</div>
+    <div id="report-result" style="margin-top:12px;font-size:14px;"></div>
+    <div class="banner banner-blue" style="margin-top:20px;">
+      <strong>What's in the report:</strong> Total messages sent by AI, reply rate, lead pipeline breakdown, hours saved estimate, commission opportunity in pipeline, and your top 10 leads to call this month.
+      <br><br>
+      <strong>Tip:</strong> Send this to your broker every month to show ROI. Agents who show their numbers get better leads from their office.
+    </div>
   </div>
 
   <!-- EMBED -->
   <div id="embed" class="section">
-    <h2>🔗 Embed Lead Capture Form</h2>
+    <h2 class="section-title">🔗 Embed Lead Capture Form</h2>
     <p style="color:#666;margin-bottom:20px;font-size:14px;">Copy this code and paste it into your website. When someone fills it out, AI will contact them instantly.</p>
     <div class="embed-code" id="embed-code"></div>
     <button class="btn btn-secondary btn-sm" style="margin-top:12px;" onclick="copyEmbed()">📋 Copy Embed Code</button>
@@ -225,12 +479,34 @@
 </div>
 
 <script>
-const AGENT_ID = "default-agent";
+const AGENT_ID = "default";
 
-function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = String(str || '');
-  return d.innerHTML;
+/* Safe text setter — never puts user data into innerHTML */
+function setText(el, val) { el.textContent = String(val == null ? '' : val); }
+
+function makeBadge(cls) {
+  const s = document.createElement('span');
+  s.className = 'badge badge-' + cls;
+  s.textContent = cls;
+  return s;
+}
+
+function makeScoreBar(score) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;align-items:center;gap:4px;';
+  const bar = document.createElement('div');
+  bar.className = 'score-bar';
+  const fill = document.createElement('div');
+  fill.className = 'score-fill';
+  const color = score >= 70 ? '#ef4444' : score >= 40 ? '#f97316' : '#94a3b8';
+  fill.style.cssText = 'width:' + score + '%;background:' + color + ';';
+  bar.appendChild(fill);
+  const num = document.createElement('span');
+  num.style.cssText = 'font-weight:600;font-size:13px;';
+  num.textContent = score;
+  wrap.appendChild(bar);
+  wrap.appendChild(num);
+  return wrap;
 }
 
 function showSection(name, el) {
@@ -241,8 +517,280 @@ function showSection(name, el) {
   if (name === 'leads') loadLeads();
   if (name === 'embed') setupEmbed();
   if (name === 'followups') setupSequence();
+  if (name === 'calllist') loadCallList();
+  if (name === 'showings') loadShowings();
+  if (name === 'reengagement') loadReengagementCounts();
+  if (name === 'report') setupReport();
 }
 
+/* ── Dashboard stats ── */
+async function loadStats() {
+  try {
+    const res = await fetch('/api/stats/' + AGENT_ID);
+    if (!res.ok) return;
+    const d = await res.json();
+    setText(document.getElementById('stat-total'), d.total_leads ?? '—');
+    setText(document.getElementById('stat-hot'), d.hot_leads ?? '—');
+    setText(document.getElementById('stat-qualified'), d.qualified ?? '—');
+    setText(document.getElementById('stat-reply'), d.reply_rate != null ? d.reply_rate + '%' : '—');
+    setText(document.getElementById('stat-msgs'), (d.messages_sent || 0) + (d.messages_received || 0));
+    setText(document.getElementById('stat-appts'), d.appointments_booked ?? '—');
+    setText(document.getElementById('stat-hot-sub'), (d.hot_leads || 0) + ' hot, ' + (d.engaged || 0) + ' engaged');
+    setText(document.getElementById('stat-appts-sub'), (d.appointments_completed || 0) + ' completed');
+  } catch(e) {}
+}
+
+/* ── Call List ── */
+async function loadCallList() {
+  const container = document.getElementById('calllist-container');
+  try {
+    const res = await fetch('/api/stats/' + AGENT_ID + '/call-list?limit=20');
+    if (!res.ok) throw new Error();
+    const leads = await res.json();
+    container.textContent = '';
+    if (!leads.length) {
+      container.className = 'empty';
+      container.textContent = 'No scored leads yet. Add leads via the embed form.';
+      return;
+    }
+    leads.forEach((l, i) => {
+      const score = l.score || 0;
+      const temp = l.temperature || 'cold';
+
+      const row = document.createElement('div');
+      row.className = 'call-row';
+
+      /* rank number */
+      const rank = document.createElement('div');
+      rank.style.cssText = 'font-size:18px;font-weight:700;color:#bbb;min-width:28px;';
+      rank.textContent = '#' + (i + 1);
+
+      /* left info */
+      const left = document.createElement('div');
+      left.className = 'call-row-left';
+
+      const nameRow = document.createElement('div');
+      nameRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'call-name';
+      nameEl.textContent = l.name || 'Unknown';
+      nameRow.appendChild(nameEl);
+      nameRow.appendChild(makeBadge(temp));
+
+      const meta = document.createElement('div');
+      meta.className = 'call-meta';
+      const parts = [
+        l.budget ? '💰 ' + l.budget : null,
+        l.timeline ? '⏱ ' + l.timeline : null,
+        l.pre_approved ? '✅ Pre-approved' : null,
+        l.phone || null,
+      ].filter(Boolean);
+      meta.textContent = parts.join(' · ') || 'No details yet';
+
+      left.appendChild(nameRow);
+      left.appendChild(meta);
+
+      /* right: score + call button */
+      const right = document.createElement('div');
+      right.style.cssText = 'display:flex;align-items:center;gap:10px;flex-shrink:0;';
+
+      const scoreWrap = document.createElement('div');
+      const scoreLbl = document.createElement('div');
+      scoreLbl.style.cssText = 'font-size:11px;color:#888;text-align:right;';
+      scoreLbl.textContent = 'Score';
+      scoreWrap.appendChild(scoreLbl);
+      scoreWrap.appendChild(makeScoreBar(score));
+      right.appendChild(scoreWrap);
+
+      if (l.phone) {
+        const callBtn = document.createElement('a');
+        callBtn.className = 'call-btn';
+        callBtn.href = 'tel:' + l.phone;
+        callBtn.textContent = '📞 Call';
+        right.appendChild(callBtn);
+      } else {
+        const noPhone = document.createElement('span');
+        noPhone.style.cssText = 'color:#ccc;font-size:13px;';
+        noPhone.textContent = 'No phone';
+        right.appendChild(noPhone);
+      }
+
+      row.appendChild(rank);
+      row.appendChild(left);
+      row.appendChild(right);
+      container.appendChild(row);
+    });
+  } catch(e) {
+    container.textContent = '';
+    const msg = document.createElement('div');
+    msg.className = 'empty';
+    msg.textContent = 'Could not load call list. Make sure the server is running.';
+    container.appendChild(msg);
+  }
+}
+
+/* ── Showings ── */
+async function loadShowings() {
+  const container = document.getElementById('showings-container');
+  try {
+    const res = await fetch('/api/appointments/' + AGENT_ID);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const appts = data.appointments || [];
+    container.textContent = '';
+    if (!appts.length) {
+      const msg = document.createElement('div');
+      msg.className = 'empty';
+      msg.textContent = 'No upcoming showings. Book one below.';
+      container.appendChild(msg);
+      return;
+    }
+    appts.forEach(a => {
+      const lead = a.leads || {};
+      const dt = new Date(a.scheduled_at);
+      const timeStr = dt.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' })
+        + ' at ' + dt.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+
+      const row = document.createElement('div');
+      row.className = 'showing-row';
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'showing-time';
+      timeEl.textContent = timeStr;
+
+      const info = document.createElement('div');
+      info.className = 'showing-info';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'showing-name';
+      nameEl.textContent = lead.name || 'Lead #' + a.lead_id;
+      const locEl = document.createElement('div');
+      locEl.className = 'showing-loc';
+      locEl.textContent = (a.location || '—') + (a.notes ? ' · ' + a.notes : '');
+      info.appendChild(nameEl);
+      info.appendChild(locEl);
+
+      row.appendChild(timeEl);
+      row.appendChild(info);
+      row.appendChild(makeBadge(a.status || 'scheduled'));
+      container.appendChild(row);
+    });
+  } catch(e) {
+    container.textContent = 'Could not load showings.';
+  }
+}
+
+async function bookShowing() {
+  const leadId = document.getElementById('appt-lead-id').value.trim();
+  const dt = document.getElementById('appt-datetime').value;
+  const location = document.getElementById('appt-location').value.trim();
+  const notes = document.getElementById('appt-notes').value.trim();
+  const resultEl = document.getElementById('appt-result');
+
+  if (!leadId || !dt) { alert('Lead ID and date/time are required.'); return; }
+
+  document.getElementById('appt-loading').classList.add('show');
+  resultEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/appointments/book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lead_id: leadId, agent_id: AGENT_ID, scheduled_at: dt, location, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      resultEl.textContent = '✅ Showing booked! Confirmation sent to lead.';
+      resultEl.style.color = '#22c55e';
+      loadShowings();
+    } else {
+      resultEl.textContent = '❌ ' + (data.detail || 'Error booking showing.');
+      resultEl.style.color = '#ef4444';
+    }
+  } catch(e) {
+    resultEl.textContent = 'Error connecting to server.';
+    resultEl.style.color = '#ef4444';
+  }
+  document.getElementById('appt-loading').classList.remove('show');
+}
+
+/* ── Home Valuation ── */
+async function requestValuation() {
+  const payload = {
+    name: document.getElementById('val-name').value.trim(),
+    email: document.getElementById('val-email').value.trim(),
+    phone: document.getElementById('val-phone').value.trim(),
+    address: document.getElementById('val-address').value.trim(),
+    bedrooms: parseInt(document.getElementById('val-bed').value) || null,
+    bathrooms: parseFloat(document.getElementById('val-bath').value) || null,
+    sqm: parseInt(document.getElementById('val-sqm').value) || null,
+    condition: document.getElementById('val-condition').value,
+    year_built: parseInt(document.getElementById('val-year').value) || null,
+    neighborhood: document.getElementById('val-neighborhood').value.trim(),
+    recent_upgrades: document.getElementById('val-upgrades').value.trim(),
+    agent_id: AGENT_ID,
+  };
+
+  if (!payload.name || !payload.address) { alert('Name and address are required.'); return; }
+
+  document.getElementById('val-loading').classList.add('show');
+  const resultEl = document.getElementById('val-result');
+  resultEl.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/valuation/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    resultEl.style.display = 'block';
+    if (data.success) {
+      resultEl.className = 'valuation-result';
+      resultEl.textContent = data.valuation;
+    } else {
+      resultEl.style.color = '#ef4444';
+      resultEl.textContent = 'Error: ' + (data.detail || 'Could not generate valuation.');
+    }
+  } catch(e) {
+    resultEl.style.display = 'block';
+    resultEl.textContent = 'Error connecting to server.';
+  }
+  document.getElementById('val-loading').classList.remove('show');
+}
+
+/* ── Re-engagement ── */
+async function loadReengagementCounts() {
+  try {
+    const res = await fetch('/api/stats/' + AGENT_ID);
+    if (!res.ok) return;
+    const d = await res.json();
+    const cold = Math.max(0, (d.total_leads || 0) - (d.engaged || 0) - (d.opted_out || 0));
+    setText(document.getElementById('cold-count'), cold);
+    setText(document.getElementById('dormant-count'), '—');
+    setText(document.getElementById('unqualified-count'), Math.max(0, (d.engaged || 0) - (d.qualified || 0)));
+  } catch(e) {}
+}
+
+async function triggerReengage(type) {
+  const resultEl = document.getElementById('reengage-result');
+  resultEl.textContent = 'Sending re-engagement messages via AI...';
+  resultEl.style.color = '#4f8ef7';
+  try {
+    const res = await fetch('/api/leads/reengage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent_id: AGENT_ID, segment: type })
+    });
+    const data = await res.json();
+    resultEl.textContent = data.message || '✅ Re-engagement messages queued.';
+    resultEl.style.color = '#22c55e';
+  } catch(e) {
+    resultEl.textContent = '❌ Could not send — make sure the server is running.';
+    resultEl.style.color = '#ef4444';
+  }
+}
+
+/* ── Listing descriptions ── */
 async function generateListing() {
   const address = document.getElementById('address').value;
   const bedrooms = document.getElementById('bedrooms').value;
@@ -263,7 +811,7 @@ async function generateListing() {
   try {
     const res = await fetch('/api/listings/generate', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         address, bedrooms: parseInt(bedrooms), bathrooms: parseFloat(bathrooms),
         sqm: parseInt(sqm), price: parseInt(price), features,
@@ -276,13 +824,11 @@ async function generateListing() {
     if (data.success) {
       document.getElementById('listing-text').textContent = data.description;
       document.getElementById('listing-result').style.display = 'block';
-
       const complianceEl = document.getElementById('compliance-result');
       complianceEl.className = data.compliance_passed ? 'compliance-pass' : 'compliance-fail';
-      const title = complianceEl.querySelector('.compliance-title');
-      const body = complianceEl.querySelector('.compliance-body');
-      title.textContent = data.compliance_passed ? '✅ Fair Housing Compliance: PASS' : '❌ Fair Housing Compliance: FAIL — Fix before posting';
-      body.textContent = data.compliance || '';
+      complianceEl.querySelector('.compliance-title').textContent =
+        data.compliance_passed ? '✅ Fair Housing Compliance: PASS' : '❌ Fair Housing Compliance: FAIL — Fix before posting';
+      complianceEl.querySelector('.compliance-body').textContent = data.compliance || '';
       complianceEl.style.display = 'block';
     } else {
       alert('Error generating listing. Check your API key.');
@@ -294,58 +840,68 @@ async function generateListing() {
 }
 
 function copyListing() {
-  const text = document.getElementById('listing-text').textContent;
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(document.getElementById('listing-text').textContent);
   alert('Copied to clipboard!');
 }
 
+/* ── All Leads ── */
 async function loadLeads() {
   const container = document.getElementById('leads-list');
   try {
     const res = await fetch('/api/leads/' + AGENT_ID);
     const data = await res.json();
+    container.textContent = '';
 
     if (!data.leads || data.leads.length === 0) {
-      container.textContent = 'No leads yet. Embed the lead form on your website to start capturing leads.';
-      document.getElementById('stat-leads').textContent = '0';
+      const msg = document.createElement('div');
+      msg.className = 'empty';
+      msg.textContent = 'No leads yet. Embed the lead form on your website to start capturing leads.';
+      container.appendChild(msg);
       return;
     }
-
-    document.getElementById('stat-leads').textContent = data.leads.length;
 
     const table = document.createElement('table');
     table.className = 'leads-table';
 
     const thead = document.createElement('thead');
-    thead.innerHTML = '<tr><th>Name</th><th>Phone</th><th>Email</th><th>Budget</th><th>Status</th><th>Received</th><th>Action</th></tr>';
+    const hrow = document.createElement('tr');
+    ['Name', 'Phone', 'Budget', 'Score', 'Status', 'Received', 'Action'].forEach(h => {
+      const th = document.createElement('th');
+      th.textContent = h;
+      hrow.appendChild(th);
+    });
+    thead.appendChild(hrow);
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
     data.leads.forEach(l => {
       const tr = document.createElement('tr');
-
-      const statusClass = 'badge badge-' + esc(l.status);
+      const score = l.score || 0;
+      const temp = l.temperature || l.status || 'new';
       const dateStr = l.created_at ? new Date(l.created_at).toLocaleDateString() : '—';
 
       const nameTd = document.createElement('td');
-      const b = document.createElement('b');
-      b.textContent = l.name || '';
-      nameTd.appendChild(b);
+      const nameB = document.createElement('b');
+      nameB.textContent = l.name || '';
+      nameTd.appendChild(nameB);
+      if (l.email) {
+        const emailEl = document.createElement('div');
+        emailEl.style.cssText = 'font-size:12px;color:#888;';
+        emailEl.textContent = l.email;
+        nameTd.appendChild(emailEl);
+      }
 
       const phoneTd = document.createElement('td');
-      phoneTd.textContent = l.phone || '';
-
-      const emailTd = document.createElement('td');
-      emailTd.textContent = l.email || '';
+      phoneTd.textContent = l.phone || '—';
 
       const budgetTd = document.createElement('td');
       budgetTd.textContent = l.budget || '—';
 
+      const scoreTd = document.createElement('td');
+      scoreTd.appendChild(makeScoreBar(score));
+
       const statusTd = document.createElement('td');
-      const badge = document.createElement('span');
-      badge.className = statusClass;
-      badge.textContent = l.status || '';
-      statusTd.appendChild(badge);
+      statusTd.appendChild(makeBadge(temp));
 
       const dateTd = document.createElement('td');
       dateTd.textContent = dateStr;
@@ -353,19 +909,22 @@ async function loadLeads() {
       const actionTd = document.createElement('td');
       const btn = document.createElement('button');
       btn.className = 'btn btn-green btn-sm';
-      btn.textContent = '▶ Start Sequence';
+      btn.textContent = '▶ Sequence';
       btn.onclick = () => startFollowup(l.id);
       actionTd.appendChild(btn);
 
-      tr.append(nameTd, phoneTd, emailTd, budgetTd, statusTd, dateTd, actionTd);
+      tr.append(nameTd, phoneTd, budgetTd, scoreTd, statusTd, dateTd, actionTd);
       tbody.appendChild(tr);
     });
 
     table.appendChild(tbody);
-    container.textContent = '';
     container.appendChild(table);
   } catch(e) {
-    container.textContent = 'Could not load leads. Make sure the server is running.';
+    container.textContent = '';
+    const msg = document.createElement('div');
+    msg.className = 'empty';
+    msg.textContent = 'Could not load leads. Make sure the server is running.';
+    container.appendChild(msg);
   }
 }
 
@@ -373,12 +932,13 @@ async function startFollowup(leadId) {
   if (!confirm('Start automated 60-day follow-up sequence for this lead?')) return;
   await fetch('/api/followups/start', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({lead_id: leadId, agent_id: AGENT_ID})
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lead_id: leadId, agent_id: AGENT_ID })
   });
-  alert('Follow-up sequence started! AI will text this lead at day 3, 7, 14, 30, and 60.');
+  alert('Follow-up sequence started!');
 }
 
+/* ── Client updates ── */
 async function sendClientUpdates() {
   const listingsText = document.getElementById('new-listings').value;
   const listings = listingsText.split('\n').filter(l => l.trim());
@@ -388,7 +948,7 @@ async function sendClientUpdates() {
   try {
     const res = await fetch('/api/clients/send-updates/' + AGENT_ID, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(listings)
     });
     const data = await res.json();
@@ -396,11 +956,12 @@ async function sendClientUpdates() {
     resultEl.style.color = '#22c55e';
   } catch(e) {
     resultEl.textContent = 'Error sending updates.';
-    resultEl.style.color = '#e33';
+    resultEl.style.color = '#ef4444';
   }
   document.getElementById('client-loading').classList.remove('show');
 }
 
+/* ── Sequence timeline ── */
 function setupSequence() {
   const steps = [
     { day: 'Now', color: '#4f8ef7', text: 'Instant — AI texts + emails lead within seconds of form submission' },
@@ -415,21 +976,131 @@ function setupSequence() {
   steps.forEach(step => {
     const div = document.createElement('div');
     div.className = 'sequence-step';
-
     const badge = document.createElement('div');
     badge.className = 'step-badge';
     badge.style.background = step.color;
     badge.textContent = step.day;
-
     const text = document.createElement('div');
     text.textContent = step.text;
-
     div.appendChild(badge);
     div.appendChild(text);
     container.appendChild(div);
   });
 }
 
+/* ── Property Matching ── */
+async function findMatches(sendSms) {
+  const address   = document.getElementById('match-address').value.trim();
+  const price     = parseInt(document.getElementById('match-price').value);
+  const bedrooms  = parseInt(document.getElementById('match-beds').value);
+  const bathrooms = parseFloat(document.getElementById('match-baths').value);
+  const features  = document.getElementById('match-features').value.trim();
+  const neighborhood = document.getElementById('match-neighborhood').value.trim();
+
+  if (!address || !price || !bedrooms) { alert('Address, price and bedrooms are required.'); return; }
+
+  document.getElementById('match-loading').classList.add('show');
+  document.getElementById('match-results').style.display = 'none';
+  document.getElementById('match-sent').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/listings/match-leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent_id: AGENT_ID, address, price, bedrooms,
+        bathrooms: bathrooms || 1, features, neighborhood,
+        send_sms: sendSms,
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.detail || 'Error');
+
+    const leads = data.leads || [];
+    const summaryEl = document.getElementById('match-summary');
+    summaryEl.textContent = leads.length + ' lead' + (leads.length !== 1 ? 's' : '') + ' match this listing (±15% of $' + price.toLocaleString() + ')';
+
+    const listEl = document.getElementById('match-list');
+    listEl.textContent = '';
+
+    if (!leads.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No matching leads found. Try a different price range.';
+      listEl.appendChild(empty);
+      document.getElementById('blast-btn').style.display = 'none';
+    } else {
+      leads.forEach(l => {
+        const row = document.createElement('div');
+        row.className = 'call-row';
+
+        const left = document.createElement('div');
+        left.className = 'call-row-left';
+
+        const nameRow = document.createElement('div');
+        nameRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
+        const nameEl = document.createElement('span');
+        nameEl.className = 'call-name';
+        nameEl.textContent = l.name || 'Unknown';
+        nameRow.appendChild(nameEl);
+        nameRow.appendChild(makeBadge(l.temperature || 'cold'));
+
+        const meta = document.createElement('div');
+        meta.className = 'call-meta';
+        meta.textContent = (l.budget ? 'Budget: ' + l.budget : 'No budget on file') + (l.phone ? ' · ' + l.phone : '');
+
+        left.appendChild(nameRow);
+        left.appendChild(meta);
+        row.appendChild(left);
+        row.appendChild(makeScoreBar(l.score || 0));
+        listEl.appendChild(row);
+      });
+
+      document.getElementById('blast-btn').style.display = sendSms ? 'none' : 'inline-block';
+    }
+
+    if (sendSms && leads.length) {
+      const sentEl = document.getElementById('match-sent');
+      sentEl.textContent = '✅ AI SMS queued for ' + leads.length + ' leads. Each message is personalised with listing details.';
+      sentEl.style.display = 'block';
+      document.getElementById('blast-btn').style.display = 'none';
+    }
+
+    document.getElementById('match-results').style.display = 'block';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+  document.getElementById('match-loading').classList.remove('show');
+}
+
+/* ── Monthly Report ── */
+function setupReport() {
+  const link = document.getElementById('preview-report-link');
+  link.href = '/api/reports/' + AGENT_ID + '/monthly';
+}
+
+async function sendReport() {
+  const resultEl = document.getElementById('report-result');
+  document.getElementById('report-loading').classList.add('show');
+  resultEl.textContent = '';
+  try {
+    const res = await fetch('/api/reports/' + AGENT_ID + '/monthly/send', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      resultEl.textContent = '✅ ' + data.message;
+      resultEl.style.color = '#22c55e';
+    } else {
+      resultEl.textContent = '❌ ' + (data.detail || 'Error sending report.');
+      resultEl.style.color = '#ef4444';
+    }
+  } catch(e) {
+    resultEl.textContent = 'Error connecting to server.';
+    resultEl.style.color = '#ef4444';
+  }
+  document.getElementById('report-loading').classList.remove('show');
+}
+
+/* ── Embed code ── */
 function setupEmbed() {
   const origin = window.location.origin;
   const code = `<!-- Real Estate AI Lead Form -->
@@ -460,14 +1131,6 @@ document.getElementById('re-lead-form').onsubmit = async function(e) {
 function copyEmbed() {
   navigator.clipboard.writeText(document.getElementById('embed-code').textContent);
   alert('Embed code copied!');
-}
-
-async function loadStats() {
-  try {
-    const res = await fetch('/api/listings/' + AGENT_ID);
-    const data = await res.json();
-    document.getElementById('stat-listings').textContent = data.listings ? data.listings.length : 0;
-  } catch(e) {}
 }
 
 loadStats();

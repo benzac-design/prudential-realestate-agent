@@ -1,7 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from pydantic import BaseModel
 from app.models.schemas import ListingRequest
-from app.services.claude_service import generate_listing_description, audit_fair_housing_compliance
-from app.services.supabase_service import save_listing, get_listings
+from app.services.claude_service import generate_listing_description, audit_fair_housing_compliance, generate_property_match_sms
+from app.services.supabase_service import save_listing, get_listings, find_matching_leads, save_message
+from app.services.twilio_service import send_sms
+import os
 
 router = APIRouter(prefix="/listings", tags=["listings"])
 
@@ -44,5 +47,53 @@ async def list_listings(agent_id: str):
     try:
         listings = get_listings(agent_id)
         return {"success": True, "listings": listings}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class MatchRequest(BaseModel):
+    agent_id: str
+    address: str
+    price: int
+    bedrooms: int
+    bathrooms: float
+    features: str = ""
+    neighborhood: str = ""
+    send_sms: bool = False  # if True, fire the SMS blast
+
+
+def _blast_matches(leads: list, listing: dict, agent_name: str):
+    for lead in leads:
+        if not lead.get("phone"):
+            continue
+        msg = generate_property_match_sms(lead, listing, agent_name)
+        send_sms(lead["phone"], msg)
+        save_message(lead["id"], listing.get("agent_id", "default"), "outbound", msg)
+
+
+@router.post("/match-leads")
+async def match_leads(req: MatchRequest, background_tasks: BackgroundTasks):
+    """Find leads whose budget matches a listing price and optionally SMS them all."""
+    try:
+        listing = req.model_dump()
+        matches = find_matching_leads(req.agent_id, req.price, req.bedrooms)
+        agent_name = os.getenv("DEFAULT_AGENT_NAME", "Your Agent")
+
+        if req.send_sms:
+            background_tasks.add_task(_blast_matches, matches, listing, agent_name)
+
+        return {
+            "success": True,
+            "matched": len(matches),
+            "sms_queued": req.send_sms,
+            "leads": [{
+                "id": l["id"],
+                "name": l.get("name"),
+                "phone": l.get("phone"),
+                "budget": l.get("budget"),
+                "temperature": l.get("temperature", "cold"),
+                "score": l.get("score", 0),
+            } for l in matches],
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
