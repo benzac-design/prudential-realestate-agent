@@ -10,7 +10,7 @@ from pathlib import Path
 load_dotenv()
 
 from fastapi import Depends
-from app.routes import listings, leads, followups, clients, conversations, appointments, stats, valuation, reports, maintenance, renewals, rent, inspections
+from app.routes import listings, leads, followups, clients, conversations, appointments, stats, valuation, reports, maintenance, renewals, rent, inspections, applications
 from app.scheduler import process_pending_followups, send_appointment_reminders, process_lease_renewals, process_rent_arrears, process_inspections
 from app.auth import require_dashboard_auth
 
@@ -40,6 +40,7 @@ app.include_router(maintenance.router, prefix="/api", dependencies=_auth)
 app.include_router(renewals.router, prefix="/api", dependencies=_auth)
 app.include_router(rent.router, prefix="/api", dependencies=_auth)
 app.include_router(inspections.router, prefix="/api", dependencies=_auth)
+app.include_router(applications.router, prefix="/api")  # auth baked into the router
 
 # Mixed/public routers — these contain endpoints the public website + Twilio call,
 # so auth is applied per-endpoint inside the router (not router-wide).

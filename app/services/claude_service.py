@@ -302,6 +302,52 @@ Rules:
     return _ask(prompt)
 
 
+def screen_rental_application(applicant_name, address, weekly_rent, annual_income=None,
+                             employment="", rental_history="", references_note="", notes="",
+                             agent_name=""):
+    """Score a rental application 0-100 with an approve/review/decline recommendation.
+    Returns: score, recommendation, rationale, rent_to_income, flags (list)."""
+    income_txt = f"${annual_income:,.0f}/yr" if annual_income else "not provided"
+    rti_hint = ""
+    if annual_income and weekly_rent:
+        rti = (float(weekly_rent) * 52) / float(annual_income) * 100
+        rti_hint = f"\nRent-to-income ratio: ~{rti:.0f}% (under ~30% is comfortable, 30-40% is okay, over 40% is a strain)."
+
+    system = f"""You are {agent_name or 'an experienced property manager'} screening a rental application. Assess the applicant fairly and consistently for a property at {address} at ${float(weekly_rent):g}/week.
+
+Applicant: {applicant_name}
+Annual income: {income_txt}
+Employment: {employment or 'not provided'}
+Rental history: {rental_history or 'not provided'}
+References: {references_note or 'not provided'}
+Other notes: {notes or 'none'}{rti_hint}
+
+Score 0-100 weighing: affordability (rent-to-income), income/employment stability, rental history (on-time payments, no damage/eviction), and references. Be fair and objective. Do NOT consider race, religion, family status, disability, national origin, age, or any protected attribute — ignore and do not mention them (Fair Housing). If key info is missing, lower confidence and lean toward "review" rather than guessing.
+
+Recommendation thresholds: score >=75 -> "approve"; 55-74 -> "review"; <55 -> "decline".
+
+Respond with ONLY a JSON object, no other text:
+{{
+  "score": <integer 0-100>,
+  "recommendation": "<approve|review|decline>",
+  "rent_to_income": "<percentage like '32%' or 'unknown'>",
+  "rationale": "<2-3 sentence justification for the property manager>",
+  "flags": ["<short risk or missing-info note>", "..."]
+}}"""
+
+    result = _ask_json(system, [{"role": "user", "content": f"Screen {applicant_name}'s application for {address}."}])
+    try:
+        result["score"] = max(0, min(100, int(result.get("score", 0))))
+    except (ValueError, TypeError):
+        result["score"] = 0
+    result.setdefault("recommendation", "review")
+    result.setdefault("rent_to_income", "unknown")
+    result.setdefault("rationale", "Insufficient information to score confidently — manual review recommended.")
+    if not isinstance(result.get("flags"), list):
+        result["flags"] = []
+    return result
+
+
 def generate_inspection_notice(tenant_name, address, inspection_date, agent_name=""):
     """Friendly, compliant notice to a tenant that a routine inspection is scheduled."""
     prompt = f"""You are {agent_name or 'the property manager'}, notifying a tenant of an upcoming routine inspection.

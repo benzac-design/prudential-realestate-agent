@@ -135,6 +135,32 @@ class InspectionRecord(BaseModel):
     tenant_email: Optional[str] = ""
 
 
+class ApplicationRecord(BaseModel):
+    agent_id: str
+    applicant_name: str
+    address: str
+    weekly_rent: float
+    annual_income: Optional[float] = None
+    employment: Optional[str] = ""
+    rental_history: Optional[str] = ""
+    references_note: Optional[str] = ""
+    notes: Optional[str] = ""
+    applicant_email: Optional[str] = ""
+    applicant_phone: Optional[str] = ""
+    save: Optional[bool] = True        # persist + screen; if False, just return a screening
+
+
+class ApplicationScreenRequest(BaseModel):
+    applicant_name: str
+    address: str
+    weekly_rent: float
+    annual_income: Optional[float] = None
+    employment: Optional[str] = ""
+    rental_history: Optional[str] = ""
+    references_note: Optional[str] = ""
+    notes: Optional[str] = ""
+
+
 class AgentProfile(BaseModel):
     id: Optional[str] = None
     name: str

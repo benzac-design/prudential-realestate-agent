@@ -346,6 +346,26 @@ def complete_inspection(inspection_id: str) -> dict:
     return {"next_inspection_date": next_date.isoformat()}
 
 
+# ---- Rental applications ----
+
+def save_application(data: dict) -> dict:
+    db = get_client()
+    result = db.table("applications").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_applications(agent_id: str) -> list:
+    """Applications for an agent, highest score first (unscored last)."""
+    db = get_client()
+    rows = db.table("applications").select("*").eq("agent_id", agent_id).execute().data or []
+    return sorted(rows, key=lambda a: (a.get("score") is not None, a.get("score") or 0), reverse=True)
+
+
+def update_application_screening(application_id: str, fields: dict):
+    db = get_client()
+    db.table("applications").update(fields).eq("id", application_id).execute()
+
+
 # ---- Analytics ----
 
 def get_agent_stats(agent_id: str) -> dict:
