@@ -36,7 +36,7 @@ app.include_router(clients.router, prefix="/api", dependencies=_auth)
 app.include_router(appointments.router, prefix="/api", dependencies=_auth)
 app.include_router(stats.router, prefix="/api", dependencies=_auth)
 app.include_router(reports.router, prefix="/api", dependencies=_auth)
-app.include_router(maintenance.router, prefix="/api", dependencies=_auth)
+app.include_router(maintenance.router, prefix="/api")  # auth baked into the router
 app.include_router(renewals.router, prefix="/api", dependencies=_auth)
 app.include_router(rent.router, prefix="/api", dependencies=_auth)
 app.include_router(inspections.router, prefix="/api", dependencies=_auth)

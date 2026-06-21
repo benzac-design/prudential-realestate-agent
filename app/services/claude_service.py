@@ -372,37 +372,54 @@ def triage_maintenance_request(tenant_name, address, message, agent_name=""):
     Returns a dict: urgency, category, summary, recommended_action, tenant_reply, eta.
     Urgency is one of: emergency, urgent, routine.
     """
-    system = f"""You are {agent_name or 'the property manager'}, triaging a maintenance request from a tenant named {tenant_name} at {address}.
+    system = f"""You are {agent_name or 'the property manager'}, an experienced property manager triaging a maintenance request from a tenant named {tenant_name} at {address}.
 
 The tenant said:
 \"\"\"{message}\"\"\"
 
-Classify the issue and decide how fast it must be handled:
-- "emergency": immediate risk to safety or property (gas leak, burst pipe/flooding, no power, no heat in winter, security/lock failure, sewage). Same-day response.
+Classify urgency and decide how fast it must be handled:
+- "emergency": immediate risk to safety or property (gas leak, burst pipe/flooding, no power, no heat in winter, security/lock failure, sewage, electrical sparks/burning smell). Same-day response.
 - "urgent": real disruption but not dangerous (no hot water, fridge/oven dead, blocked toilet with another available, persistent leak). 24-48 hours.
 - "routine": minor or cosmetic (dripping tap, squeaky door, cracked tile, garden, general wear). Schedule within the week.
 
 Pick the single best category: plumbing, electrical, appliance, heating_cooling, structural, pest, locks_security, garden, other.
+Pick the right trade to send: plumber, electrician, handyman, appliance_technician, hvac_technician, locksmith, pest_controller, gardener, builder, other.
 
-Write a short, warm reply to the tenant that acknowledges the issue, sets expectations on timing, and (for emergencies) tells them any immediate safety step.
+Estimate a rough callout cost range in AUD for this kind of job (a ballpark for the landlord's expectation, e.g. "$150–$300"). If it could plausibly be a simple, SAFE thing the tenant can check or fix themselves first (e.g. tripped safety switch, full vacuum bag, blocked filter, batteries in smoke alarm), set diy_possible true and give one clear safe tip. NEVER suggest DIY for anything involving gas, mains electrical, heights, or structural work — set diy_possible false for those.
+
+For emergencies, include a clear immediate safety_warning (e.g. "Turn off the water at the mains", "Do not use light switches if you smell gas — leave and call 000 if unsafe"). For non-emergencies, safety_warning can be "".
+
+Write a short, warm reply to the tenant that acknowledges the issue, sets timing expectations, and includes any immediate safety step or DIY tip.
 
 Respond with ONLY a JSON object, no other text:
 {{
   "urgency": "<emergency|urgent|routine>",
   "category": "<one category from the list>",
+  "trade": "<one trade from the list>",
   "summary": "<one-sentence summary for the landlord/tradesperson>",
+  "likely_cause": "<your best guess at the underlying cause, one short phrase>",
   "recommended_action": "<what the property manager should do next, one sentence>",
+  "estimated_cost": "<AUD range like '$150–$300', or 'unknown'>",
   "eta": "<plain-language response window, e.g. 'same day', '24-48 hours', 'within the week'>",
+  "access_required": <true if a tradesperson needs entry to the property, else false>,
+  "diy_possible": <true|false>,
+  "diy_tip": "<one safe thing the tenant can try, or '' if none>",
+  "safety_warning": "<immediate safety instruction for emergencies, else ''>",
   "tenant_reply": "<the SMS/email reply to send the tenant, under 320 characters>"
 }}"""
 
     result = _ask_json(system, [{"role": "user", "content": message}])
-    result.setdefault("urgency", "routine")
-    result.setdefault("category", "other")
-    result.setdefault("summary", message[:140])
-    result.setdefault("recommended_action", "Review and assign a tradesperson.")
-    result.setdefault("eta", "within the week")
-    result.setdefault("tenant_reply", f"Thanks {tenant_name}, we've logged your maintenance request and will be in touch shortly.")
+    defaults = {
+        "urgency": "routine", "category": "other", "trade": "other",
+        "summary": message[:140], "likely_cause": "",
+        "recommended_action": "Review and assign a tradesperson.",
+        "estimated_cost": "unknown", "eta": "within the week",
+        "access_required": True, "diy_possible": False, "diy_tip": "",
+        "safety_warning": "",
+        "tenant_reply": f"Thanks {tenant_name}, we've logged your maintenance request and will be in touch shortly.",
+    }
+    for k, v in defaults.items():
+        result.setdefault(k, v)
     return result
 
 

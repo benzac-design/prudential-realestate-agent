@@ -84,6 +84,12 @@ class MaintenanceRequest(BaseModel):
     tenant_phone: Optional[str] = ""
     tenant_email: Optional[str] = ""
     agent_id: Optional[str] = ""
+    save: Optional[bool] = True        # persist to the job board (set False for a one-off demo)
+
+
+class MaintenanceStatusUpdate(BaseModel):
+    status: str                        # open | assigned | scheduled | resolved
+    assigned_to: Optional[str] = None
 
 
 class LeaseRenewalRequest(BaseModel):

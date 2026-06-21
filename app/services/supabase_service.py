@@ -346,6 +346,38 @@ def complete_inspection(inspection_id: str) -> dict:
     return {"next_inspection_date": next_date.isoformat()}
 
 
+# ---- Maintenance jobs ----
+
+_URGENCY_RANK = {"emergency": 0, "urgent": 1, "routine": 2}
+
+
+def save_maintenance_request(data: dict) -> dict:
+    db = get_client()
+    result = db.table("maintenance_requests").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_maintenance_requests(agent_id: str) -> list:
+    """Open jobs first, most urgent first; resolved jobs sink to the bottom."""
+    db = get_client()
+    rows = db.table("maintenance_requests").select("*").eq("agent_id", agent_id).execute().data or []
+    return sorted(rows, key=lambda r: (
+        r.get("status") == "resolved",
+        _URGENCY_RANK.get(r.get("urgency"), 3),
+        r.get("created_at") or "",
+    ))
+
+
+def update_maintenance_status(request_id: str, status: str, assigned_to: str = None):
+    db = get_client()
+    fields = {"status": status}
+    if assigned_to is not None:
+        fields["assigned_to"] = assigned_to
+    if status == "resolved":
+        fields["resolved_at"] = datetime.utcnow().isoformat()
+    db.table("maintenance_requests").update(fields).eq("id", request_id).execute()
+
+
 # ---- Rental applications ----
 
 def save_application(data: dict) -> dict:
