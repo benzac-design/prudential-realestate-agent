@@ -1,6 +1,6 @@
 from supabase import create_client
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 _client = None
 
@@ -171,6 +171,181 @@ def mark_appointment_reminded(appointment_id: str):
     db.table("appointments").update({"reminder_sent": True}).eq("id", appointment_id).execute()
 
 
+# ---- Leases / renewals ----
+
+def save_lease(data: dict) -> dict:
+    db = get_client()
+    result = db.table("leases").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_leases(agent_id: str) -> list:
+    db = get_client()
+    result = (
+        db.table("leases").select("*")
+        .eq("agent_id", agent_id).order("lease_end").execute()
+    )
+    return result.data or []
+
+
+def get_leases_needing_renewal(days_min: int = 60, days_max: int = 90) -> list:
+    """Active leases whose end date falls inside the renewal window (default 60-90
+    days out) and that haven't been flagged for renewal yet."""
+    db = get_client()
+    today = date.today()
+    window_start = (today + timedelta(days=days_min)).isoformat()
+    window_end = (today + timedelta(days=days_max)).isoformat()
+    result = (
+        db.table("leases").select("*")
+        .eq("status", "active").eq("renewal_flagged", False)
+        .gte("lease_end", window_start).lte("lease_end", window_end)
+        .order("lease_end").execute()
+    )
+    return result.data or []
+
+
+def mark_lease_renewal_flagged(lease_id: str):
+    db = get_client()
+    db.table("leases").update({"renewal_flagged": True}).eq("id", lease_id).execute()
+
+
+# ---- Rent / arrears ----
+
+def save_rent_payment(data: dict) -> dict:
+    db = get_client()
+    result = db.table("rent_payments").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_rent_payments(agent_id: str) -> list:
+    db = get_client()
+    result = (
+        db.table("rent_payments").select("*")
+        .eq("agent_id", agent_id).order("due_date").execute()
+    )
+    return result.data or []
+
+
+def get_rent_due_for_reminder(within_days: int = 3) -> list:
+    """Pending payments due within the next `within_days` days that haven't been
+    reminded yet (and aren't already overdue)."""
+    db = get_client()
+    today = date.today()
+    window_end = (today + timedelta(days=within_days)).isoformat()
+    result = (
+        db.table("rent_payments").select("*")
+        .eq("status", "pending").eq("reminder_sent", False)
+        .gte("due_date", today.isoformat()).lte("due_date", window_end)
+        .order("due_date").execute()
+    )
+    return result.data or []
+
+
+def get_overdue_rent() -> list:
+    """Pending payments whose due date has passed and that haven't been alerted yet."""
+    db = get_client()
+    today = date.today()
+    result = (
+        db.table("rent_payments").select("*")
+        .eq("status", "pending").eq("overdue_alert_sent", False)
+        .lt("due_date", today.isoformat())
+        .order("due_date").execute()
+    )
+    return result.data or []
+
+
+def mark_rent_reminder_sent(payment_id: str):
+    db = get_client()
+    db.table("rent_payments").update({"reminder_sent": True}).eq("id", payment_id).execute()
+
+
+def mark_rent_overdue_alerted(payment_id: str):
+    db = get_client()
+    db.table("rent_payments").update(
+        {"status": "overdue", "overdue_alert_sent": True}
+    ).eq("id", payment_id).execute()
+
+
+def mark_rent_paid(payment_id: str):
+    db = get_client()
+    db.table("rent_payments").update(
+        {"status": "paid", "paid_date": date.today().isoformat()}
+    ).eq("id", payment_id).execute()
+
+
+# ---- Routine inspections ----
+
+def _add_months(d: date, months: int) -> date:
+    """Add whole months to a date, clamping the day to the target month's length."""
+    month = d.month - 1 + months
+    year = d.year + month // 12
+    month = month % 12 + 1
+    # Clamp day (e.g. Jan 31 + 1 month -> Feb 28/29).
+    next_month_start = date(year + (month // 12), (month % 12) + 1, 1) if month < 12 else date(year + 1, 1, 1)
+    last_day = (next_month_start - timedelta(days=1)).day
+    return date(year, month, min(d.day, last_day))
+
+
+def save_inspection(data: dict) -> dict:
+    db = get_client()
+    result = db.table("inspections").insert(data).execute()
+    return result.data[0] if result.data else {}
+
+
+def get_inspections(agent_id: str) -> list:
+    db = get_client()
+    result = (
+        db.table("inspections").select("*")
+        .eq("agent_id", agent_id).order("next_inspection_date").execute()
+    )
+    return result.data or []
+
+
+def get_inspections_needing_notice(within_days: int = 14) -> list:
+    """Scheduled inspections coming up within the notice window that haven't had
+    a tenant notice sent yet."""
+    db = get_client()
+    today = date.today()
+    window_end = (today + timedelta(days=within_days)).isoformat()
+    result = (
+        db.table("inspections").select("*")
+        .eq("status", "scheduled").eq("notice_sent", False)
+        .gte("next_inspection_date", today.isoformat())
+        .lte("next_inspection_date", window_end)
+        .order("next_inspection_date").execute()
+    )
+    return result.data or []
+
+
+def mark_inspection_notice_sent(inspection_id: str):
+    db = get_client()
+    db.table("inspections").update(
+        {"notice_sent": True, "status": "notice_sent"}
+    ).eq("id", inspection_id).execute()
+
+
+def complete_inspection(inspection_id: str) -> dict:
+    """Mark an inspection done and auto-schedule the next one frequency_months out."""
+    db = get_client()
+    rows = db.table("inspections").select("*").eq("id", inspection_id).execute().data or []
+    if not rows:
+        return {}
+    insp = rows[0]
+    freq = insp.get("frequency_months") or 6
+    try:
+        base = date.fromisoformat(str(insp["next_inspection_date"]))
+    except (ValueError, TypeError):
+        base = date.today()
+    next_date = _add_months(date.today() if base < date.today() else base, freq)
+    db.table("inspections").update({
+        "last_completed": date.today().isoformat(),
+        "next_inspection_date": next_date.isoformat(),
+        "status": "scheduled",
+        "notice_sent": False,
+    }).eq("id", inspection_id).execute()
+    return {"next_inspection_date": next_date.isoformat()}
+
+
 # ---- Analytics ----
 
 def get_agent_stats(agent_id: str) -> dict:
@@ -199,6 +374,33 @@ def get_agent_stats(agent_id: str) -> dict:
         "messages_received": inbound,
         "appointments_booked": len(appts),
         "appointments_completed": sum(1 for a in appts if a["status"] == "completed"),
+    }
+
+
+def get_rental_stats(agent_id: str) -> dict:
+    """Rental-portfolio numbers for the monthly report: arrears, inspections and
+    lease renewals coming due."""
+    db = get_client()
+    today = date.today()
+
+    payments = db.table("rent_payments").select("amount, status, due_date").eq("agent_id", agent_id).execute().data or []
+    arrears = [p for p in payments if p.get("status") == "overdue"
+               or (p.get("status") == "pending" and str(p.get("due_date", "")) < today.isoformat())]
+    arrears_amount = sum(float(p.get("amount") or 0) for p in arrears)
+
+    insp_window = (today + timedelta(days=30)).isoformat()
+    inspections = db.table("inspections").select("id").eq("agent_id", agent_id) \
+        .neq("status", "completed").lte("next_inspection_date", insp_window).execute().data or []
+
+    lease_window = (today + timedelta(days=90)).isoformat()
+    renewals = db.table("leases").select("id").eq("agent_id", agent_id) \
+        .eq("status", "active").lte("lease_end", lease_window).execute().data or []
+
+    return {
+        "arrears_count": len(arrears),
+        "arrears_amount": arrears_amount,
+        "inspections_due": len(inspections),
+        "renewals_due": len(renewals),
     }
 
 

@@ -1,11 +1,51 @@
 from fastapi import APIRouter, HTTPException
 import os
 
-from app.models.schemas import LeaseRenewalRequest
+from app.models.schemas import LeaseRenewalRequest, LeaseRecord
 from app.services.claude_service import generate_lease_renewal_offer
 from app.services.resend_service import send_email, text_to_html
+from app.services.supabase_service import save_lease, get_leases, get_leases_needing_renewal
+from app.scheduler import process_lease_renewals
 
 router = APIRouter(prefix="/renewals", tags=["renewals"])
+
+
+@router.post("/leases")
+async def add_lease(lease: LeaseRecord):
+    """Register a tenancy so the agent can monitor its end date and auto-flag the
+    renewal 60-90 days out."""
+    try:
+        saved = save_lease(lease.model_dump())
+        return {"success": True, "lease": saved}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/leases/{agent_id}")
+async def list_leases(agent_id: str):
+    try:
+        return {"success": True, "leases": get_leases(agent_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/due")
+async def leases_due():
+    """Preview which leases are inside the 60-90 day renewal window (not yet flagged)."""
+    try:
+        return {"success": True, "leases": get_leases_needing_renewal()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/run")
+async def run_renewals():
+    """Manually trigger the lease-renewal monitor (also runs daily via cron)."""
+    try:
+        await process_lease_renewals()
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/draft")
