@@ -48,9 +48,21 @@ async def audit_listing(request: AuditRequest):
 @router.post("/save")
 async def save_listing_route(request: ListingRequest, description: str, agent_id: str):
     try:
-        data = request.model_dump()
-        data["description"] = description
-        data["agent_id"] = agent_id
+        req = request.model_dump()
+        # The request schema carries fields the Supabase `listings` table doesn't
+        # have (agent_name, listing_type, and `sqm` which maps to the `sqft`
+        # column). Build an insert with only real columns so it doesn't 500.
+        data = {
+            "agent_id": agent_id,
+            "address": req.get("address"),
+            "bedrooms": req.get("bedrooms"),
+            "bathrooms": req.get("bathrooms"),
+            "sqft": req.get("sqm"),
+            "price": req.get("price"),
+            "features": req.get("features"),
+            "neighborhood": req.get("neighborhood"),
+            "description": description,
+        }
         result = save_listing(data)
         return {"success": True, "listing": result}
     except Exception as e:
