@@ -54,6 +54,28 @@ def mark_followup_sent(followup_id: str):
     db.table("followup_schedules").update({"sent": True}).eq("id", followup_id).execute()
 
 
+def get_followups(agent_id: str) -> list:
+    """All scheduled follow-ups for an agent (with the lead they belong to),
+    soonest-first — powers the /live Follow-ups tab."""
+    db = get_client()
+    result = (
+        db.table("followup_schedules").select("*, leads(name, phone, email)")
+        .eq("agent_id", agent_id).order("send_at", desc=False).execute()
+    )
+    return result.data or []
+
+
+def get_seller_leads(agent_id: str) -> list:
+    """Leads captured via the home-valuation lead magnet (lead_type 'seller'),
+    newest-first — powers the /live Seller Valuations tab."""
+    db = get_client()
+    result = (
+        db.table("leads").select("*").eq("agent_id", agent_id)
+        .eq("lead_type", "seller").order("created_at", desc=True).execute()
+    )
+    return result.data or []
+
+
 def get_clients_for_update(agent_id: str) -> list:
     db = get_client()
     result = db.table("buyer_clients").select("*").eq("agent_id", agent_id).execute()

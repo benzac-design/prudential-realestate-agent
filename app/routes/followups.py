@@ -1,12 +1,22 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models.schemas import FollowUpSequence
 from app.services.claude_service import generate_followup_sequence_message
-from app.services.supabase_service import save_followup_schedule, get_leads
+from app.services.supabase_service import save_followup_schedule, get_leads, get_followups
+from app.auth import require_dashboard_auth
 from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/followups", tags=["followups"])
 
 SEQUENCE_DAYS = [3, 7, 14, 30, 60]
+
+
+@router.get("/{agent_id}", dependencies=[Depends(require_dashboard_auth)])
+async def list_followups(agent_id: str):
+    """Scheduled follow-up messages for an agent's leads."""
+    try:
+        return {"success": True, "followups": get_followups(agent_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/start")

@@ -1,12 +1,22 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import os
 
 from app.models.schemas import ValuationRequest
 from app.services.claude_service import generate_home_valuation
-from app.services.supabase_service import save_lead, save_message
+from app.services.supabase_service import save_lead, save_message, get_seller_leads
 from app.services.resend_service import send_email, text_to_html
+from app.auth import require_dashboard_auth
 
 router = APIRouter(prefix="/valuation", tags=["valuation"])
+
+
+@router.get("/{agent_id}", dependencies=[Depends(require_dashboard_auth)])
+async def list_valuations(agent_id: str):
+    """Seller leads captured via the home-valuation lead magnet."""
+    try:
+        return {"success": True, "valuations": get_seller_leads(agent_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/request")
