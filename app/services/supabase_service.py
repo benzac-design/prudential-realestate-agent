@@ -66,12 +66,13 @@ def get_followups(agent_id: str) -> list:
 
 
 def get_seller_leads(agent_id: str) -> list:
-    """Leads captured via the home-valuation lead magnet (lead_type 'seller'),
-    newest-first — powers the /live Seller Valuations tab."""
+    """Leads captured via the home-valuation lead magnet, newest-first — powers
+    the /live Seller Valuations tab. Identified by their valuation enquiry
+    message (the `leads` table has no lead_type column)."""
     db = get_client()
     result = (
         db.table("leads").select("*").eq("agent_id", agent_id)
-        .eq("lead_type", "seller").order("created_at", desc=True).execute()
+        .ilike("message", "%valuation%").order("created_at", desc=True).execute()
     )
     return result.data or []
 

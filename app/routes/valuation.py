@@ -45,7 +45,6 @@ async def request_valuation(req: ValuationRequest):
             "phone": req.phone or "",
             "message": f"Home valuation request for {req.address}",
             "agent_id": req.agent_id,
-            "lead_type": "seller",
             "status": "new",
         })
         if lead.get("id"):
